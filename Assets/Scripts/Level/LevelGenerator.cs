@@ -22,6 +22,7 @@ public class LevelGenerator : MonoBehaviour
     
     private int levelEntryCount = 0; // 记录总关卡进入次数，用作关卡蓝图索引
     private int parkEntryCount = 0; // 记录公园进入次数，后续和公园生成随机性相关
+    private int forestEntryCount = 0;
 
     // 已生成Prop的信息（位置、影响半径等）
     [System.Serializable]
@@ -82,6 +83,10 @@ public class LevelGenerator : MonoBehaviour
         // 根据蓝图的关卡类型生成关卡
         switch (blueprint.levelType)
         {
+            case LevelType.Forest:
+                forestEntryCount++;
+                GenerateForest(blueprint, levelRoot);
+                break;
             case LevelType.Park:
                 parkEntryCount++; // 记录公园进入次数
                 GeneratePark(blueprint, levelRoot);
@@ -143,6 +148,22 @@ public class LevelGenerator : MonoBehaviour
             levelRoot, terrainRadius, spawnedProps, smallPropSafeDistance);
 
         // 在随机位置生成门，确保不与其他Prop重叠
+        bool doorPlaced = GenerateDoor(blueprint.doorPrefab, levelRoot, terrainRadius * 0.9f, spawnedProps);
+    }
+
+    // 生成森林关卡
+    private void GenerateForest(LevelBlueprint blueprint, Transform levelRoot)
+    {
+        // 生成地形
+        float terrainRadius = GenerateTerrain(blueprint, levelRoot);
+
+        // 用于跟踪已生成Prop的信息，防止重叠
+        List<SpawnedPropInfo> spawnedProps = new List<SpawnedPropInfo>();
+
+        GenerateRandomProps(blueprint.largePropPrefabs, blueprint.largePropCount, levelRoot, terrainRadius * 0.8f, spawnedProps, largePropSafeDistance);
+        GenerateRandomProps(blueprint.smallPropPrefabs, blueprint.smallPropCount, levelRoot, terrainRadius, spawnedProps, smallPropSafeDistance);
+
+        // 同样生成门
         bool doorPlaced = GenerateDoor(blueprint.doorPrefab, levelRoot, terrainRadius * 0.9f, spawnedProps);
     }
 
@@ -233,6 +254,14 @@ public class LevelGenerator : MonoBehaviour
         {
             Vector2 randomPos2D = Random.insideUnitCircle * spawnRadius;
             Vector3 candidatePos = new Vector3(centerPos.x + randomPos2D.x, centerPos.y, centerPos.z + randomPos2D.y);
+
+            // 针对凹凸地形，利用射线判断位置y值
+            RaycastHit hit;
+            Vector3 rayStart = candidatePos + Vector3.up * 5f;
+            if (Physics.Raycast(rayStart, Vector3.down, out hit, 15f))
+            {
+                candidatePos.y = hit.point.y;
+            }
 
             if (!IsPositionOverlapping(candidatePos, propRadius, spawnedProps, safeDistance))
             {

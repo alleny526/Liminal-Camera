@@ -198,12 +198,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   levelBlueprints:
   - {fileID: 11400000, guid: c470b8535bb4a9b4ab87539d9825f094, type: 2}
-  - {fileID: 11400000, guid: c470b8535bb4a9b4ab87539d9825f094, type: 2}
+  - {fileID: 11400000, guid: 4ed81f02cb515614bab9f1ca9ac7c2b1, type: 2}
   poiSafeDistance: 5
   largePropSafeDistance: 4
   smallPropSafeDistance: 2
   doorSafeDistance: 5
-  extraSafetyMargin: 0.5
+  extraSafeDistance: 0.5
   maxAttempts: 50
   doorMaxAttempts: 100
 --- !u!4 &163186957
@@ -854,6 +854,26 @@ PrefabInstance:
         type: 3}
       propertyPath: groundLayerMask.m_Bits
       value: 64
+      objectReference: {fileID: 0}
+    - target: {fileID: 5552398715577685572, guid: 4e9de429961718a49bc0e79f70cb8749,
+        type: 3}
+      propertyPath: m_BackGroundColor.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5552398715577685572, guid: 4e9de429961718a49bc0e79f70cb8749,
+        type: 3}
+      propertyPath: m_BackGroundColor.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5552398715577685572, guid: 4e9de429961718a49bc0e79f70cb8749,
+        type: 3}
+      propertyPath: m_BackGroundColor.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5552398715577685572, guid: 4e9de429961718a49bc0e79f70cb8749,
+        type: 3}
+      propertyPath: m_BackGroundColor.r
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5848720441561414908, guid: 4e9de429961718a49bc0e79f70cb8749,
         type: 3}

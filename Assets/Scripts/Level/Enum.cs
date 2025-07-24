@@ -1,5 +1,6 @@
 public enum LevelType
 {
     None,
-    Park
+    Park,
+    Forest
 }
