@@ -217,16 +217,8 @@ public class LevelGenerator : MonoBehaviour
             return false;
         }
 
-        // 临时实例化门来获取其半径
-        GameObject tempDoorInstance = Instantiate(blueprint.doorPrefab, Vector3.zero, Quaternion.identity);
-        float doorRadius = GetPropRadius(tempDoorInstance);
-        DestroyImmediate(tempDoorInstance);
-        // GameObject tempPortalCam = GameObject.FindGameObjectWithTag("PortalCamera");
-        // DestroyImmediate(tempPortalCam);
-        // TODO: 上述代码原想一并将临时的portal camera销毁，但可能会导致门显示不了下一关画面
-
         // 找一个安全的位置
-        Vector3 doorPos = FindSafePosition(levelRoot.position, spawnRadius, spawnedProps, blueprint.doorSafeDistance, doorRadius);
+        Vector3 doorPos = FindSafePosition(levelRoot.position, spawnRadius, spawnedProps, blueprint.doorSafeDistance, 1.0f);
 
         // 确定位置和旋转后，生成门
         // 门总是朝向关卡中心
@@ -236,7 +228,7 @@ public class LevelGenerator : MonoBehaviour
             Quaternion doorRotation = Quaternion.LookRotation(lookDirection);
 
             GameObject doorInstance = Instantiate(blueprint.doorPrefab, doorPos, doorRotation, levelRoot);
-            spawnedProps.Add(new SpawnedPropInfo(doorPos, doorRadius, doorInstance));
+            spawnedProps.Add(new SpawnedPropInfo(doorPos, 1.0f, doorInstance));
             return true;
         }
         return false;
@@ -258,6 +250,10 @@ public class LevelGenerator : MonoBehaviour
             if (Physics.Raycast(rayStart, Vector3.down, out hit, 15f))
             {
                 candidatePos.y = hit.point.y;
+                if (hit.collider != null && hit.collider.GetComponentInParent<Prop>() != null)
+                {
+                    continue;
+                }
             }
 
             if (!IsPositionOverlapping(candidatePos, propRadius, spawnedProps, safeDistance))

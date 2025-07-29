@@ -26,7 +26,10 @@ public class Door : Prop
     void Awake()
     {
         mainCamera = Camera.main;
+    }
 
+    void Start()
+    {
         if (portalScreen != null)
         {
             portalScreen.gameObject.SetActive(false);
@@ -35,6 +38,7 @@ public class Door : Prop
             portalCamObj.tag = "PortalCamera";
             portalCamera = portalCamObj.AddComponent<Camera>();
             portalCamera.enabled = false;
+            portalCamera.transform.SetParent(transform);
 
             renderTexture = new RenderTexture(Screen.width, Screen.height, 24);
             portalCamera.targetTexture = renderTexture;
