@@ -13,6 +13,7 @@ public class DoorController : MonoBehaviour
 
     private Animation doorAnim;
     private BoxCollider doorCollider;           //To enable the player to go through the door if door is opened else block him
+    private Door door;
 
     enum DoorState
     {
@@ -44,6 +45,8 @@ public class DoorController : MonoBehaviour
             //UnityEditor.EditorApplication.isPlaying = false;
             Debug.LogError("Assign Key GameObject");
         }
+
+        door = GetComponentInParent<Door>();
     }
 
     private void OnTriggerEnter(Collider other)
@@ -83,7 +86,6 @@ public class DoorController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.E) && playerInZone)
         {
             doorOpened = !doorOpened;           //The toggle function of door to open/close
-            Prop interactable = GetComponentInParent<Prop>();
 
             if (doorState == DoorState.Closed && !doorAnim.isPlaying)
             {
@@ -91,7 +93,7 @@ public class DoorController : MonoBehaviour
                 {
                     doorAnim.Play("Door_Open");
                     doorState = DoorState.Opened;
-                    interactable.Interact(interactable.gameObject);
+                    door.Interact(door.gameObject);
                 }
                 else if (keyNeeded && !gotKey)
                 {

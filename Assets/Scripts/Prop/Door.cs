@@ -30,18 +30,18 @@ public class Door : Prop
 
     void Start()
     {
+        GameObject portalCamObj = new GameObject("PortalCamera");
+        portalCamObj.tag = "PortalCamera";
+        portalCamera = portalCamObj.AddComponent<Camera>();
+        portalCamera.enabled = false;
+        portalCamera.transform.SetParent(transform);
+
+        renderTexture = new RenderTexture(Screen.width, Screen.height, 24);
+        portalCamera.targetTexture = renderTexture;
+
         if (portalScreen != null)
         {
             portalScreen.gameObject.SetActive(false);
-
-            GameObject portalCamObj = new GameObject("PortalCamera");
-            portalCamObj.tag = "PortalCamera";
-            portalCamera = portalCamObj.AddComponent<Camera>();
-            portalCamera.enabled = false;
-            portalCamera.transform.SetParent(transform);
-
-            renderTexture = new RenderTexture(Screen.width, Screen.height, 24);
-            portalCamera.targetTexture = renderTexture;
             portalScreen.material.mainTexture = renderTexture;
             portalScreen.receiveShadows = false;
             portalScreen.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
@@ -62,17 +62,20 @@ public class Door : Prop
         Vector3 viewDirection = mainCamera.transform.position - transform.position;
         float dotProduct = Vector3.Dot(transform.forward, viewDirection);
 
-        if (dotProduct > 0)
-        {
-            if (portalScreen.gameObject.activeSelf)
-            {
-                portalScreen.gameObject.SetActive(false);
-            }
-            return;
-        }
-        if (!portalScreen.gameObject.activeSelf)
+        if (isOpen && portalScreen != null)
         {
             portalScreen.gameObject.SetActive(true);
+        }
+
+        int curDotSign = dotProduct > 0 ? 1 : -1;
+
+        if (curDotSign == -1 && portalScreen.transform.localEulerAngles.y != 0.0f)
+        {
+            portalScreen.transform.localEulerAngles = new Vector3(0.0f, 0.0f, 0.0f);
+        }
+        else if (curDotSign == 1 && portalScreen.transform.localEulerAngles.y != 180.0f)
+        {
+            portalScreen.transform.localEulerAngles = new Vector3(0.0f, 180.0f, 0.0f);
         }
         
         // 计算玩家相机相对于当前门的位置和旋转

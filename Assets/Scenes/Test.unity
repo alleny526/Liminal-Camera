@@ -848,6 +848,31 @@ PrefabInstance:
       propertyPath: field of view
       value: 40
       objectReference: {fileID: 0}
+    - target: {fileID: 1473065221909896361, guid: 4e9de429961718a49bc0e79f70cb8749,
+        type: 3}
+      propertyPath: m_BackGroundColor.a
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1473065221909896361, guid: 4e9de429961718a49bc0e79f70cb8749,
+        type: 3}
+      propertyPath: m_BackGroundColor.b
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1473065221909896361, guid: 4e9de429961718a49bc0e79f70cb8749,
+        type: 3}
+      propertyPath: m_BackGroundColor.g
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1473065221909896361, guid: 4e9de429961718a49bc0e79f70cb8749,
+        type: 3}
+      propertyPath: m_BackGroundColor.r
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2523965671023577107, guid: 4e9de429961718a49bc0e79f70cb8749,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.423
+      objectReference: {fileID: 0}
     - target: {fileID: 3129444873884814295, guid: 4e9de429961718a49bc0e79f70cb8749,
         type: 3}
       propertyPath: m_IsActive
@@ -882,6 +907,11 @@ PrefabInstance:
         type: 3}
       propertyPath: groundLayerMask.m_Bits
       value: 64
+      objectReference: {fileID: 0}
+    - target: {fileID: 5062638471096074035, guid: 4e9de429961718a49bc0e79f70cb8749,
+        type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 1.381
       objectReference: {fileID: 0}
     - target: {fileID: 5195186513821379112, guid: 4e9de429961718a49bc0e79f70cb8749,
         type: 3}
