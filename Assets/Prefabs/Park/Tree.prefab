@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3991002261148116164}
   - component: {fileID: 4267289506465660344}
+  - component: {fileID: 6602664585347020971}
   m_Layer: 8
   m_Name: Tree
   m_TagString: Prop
@@ -46,7 +47,30 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   canCapture: 1
-  prefab: {fileID: 7711052441184964064}
+  prefab: {fileID: 0}
+--- !u!136 &6602664585347020971
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7711052441184964064}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 0
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 2
+  m_Radius: 0.71180207
+  m_Height: 11.127
+  m_Direction: 1
+  m_Center: {x: -0.21180207, y: 5.0635, z: 0}
 --- !u!1001 &5703313391798732125
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -119,7 +143,8 @@ PrefabInstance:
       propertyPath: m_Materials.Array.data[0]
       value: 
       objectReference: {fileID: 2100000, guid: de42047b2ff04a24c8aca8b4e32ee982, type: 2}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 13657630, guid: 17de3c1426f928b4e97bb2feeeb4d11e, type: 3}
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
     m_AddedComponents: []

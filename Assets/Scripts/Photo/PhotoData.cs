@@ -30,12 +30,18 @@ namespace LiminalCamera.Photo
         public Texture2D photoImage; 
         public List<CapturedPropData> capturedProps; 
         public TerrainIntersectionData terrainIntersection;
+        public float savedFrustumHeight;
+        public float savedFrustumBottomWidth;
+        public float savedFrustumBottomHeight;
         
-        public PhotoData(Texture2D i, List<CapturedPropData> p, TerrainIntersectionData t) 
+        public PhotoData(Texture2D i, List<CapturedPropData> p, TerrainIntersectionData t, float frustumHeight, float frustumBottomWidth, float frustumBottomHeight) 
         { 
             photoImage = i; 
             capturedProps = p; 
             terrainIntersection = t;
+            savedFrustumHeight = frustumHeight;
+            savedFrustumBottomWidth = frustumBottomWidth;
+            savedFrustumBottomHeight = frustumBottomHeight;
         } 
     }
 }

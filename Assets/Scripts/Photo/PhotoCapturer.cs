@@ -30,6 +30,27 @@ namespace LiminalCamera.Photo
             currentFrustumHeight = frustumHeight;
         }
 
+        // 保存照片
+        public PhotoData SavePhoto()
+        {
+            photoCamera.cullingMask = capturableLayer | terrainLayer;
+            RenderTexture rt = new RenderTexture(Screen.width, Screen.height, 24);
+            photoCamera.targetTexture = rt;
+            photoCamera.Render();
+            Texture2D photoImage = new Texture2D(rt.width, rt.height, TextureFormat.RGB24, false);
+            RenderTexture.active = rt;
+            photoImage.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
+            photoImage.Apply();
+            RenderTexture.active = null;
+            photoCamera.targetTexture = null;
+            Object.Destroy(rt);
+
+            List<CapturedPropData> propsInView = CapturePropsInView();
+            TerrainIntersectionData terrainIntersection = CaptureTerrainIntersectionData();
+
+            return new PhotoData(photoImage, propsInView, terrainIntersection, currentFrustumHeight, frustumBottomWidth, frustumBottomHeight);
+        }
+
         // 捕获视锥体内的所有Props
         // TODO: 目前没有部分在内即捕获的功能，需要添加
         public List<CapturedPropData> CapturePropsInView()
@@ -68,7 +89,7 @@ namespace LiminalCamera.Photo
 
             return propsInView;
         }
-        
+
         // 捕获地形与拍照锥体的相交面
         // TODO: 直接循环判断三角形方法比较粗暴，研究下会不会有更好的方法
         public TerrainIntersectionData CaptureTerrainIntersectionData()
@@ -99,6 +120,10 @@ namespace LiminalCamera.Photo
                 }
 
                 Mesh terrainMesh = meshFilter.sharedMesh;
+                if (terrainMesh.isReadable == false)
+                {
+                    terrainMesh = PhotoUtil.MakeReadableMeshCopy(terrainMesh);
+                }
                 Transform terrainTransform = terrainMeshCollider.transform;
 
                 // 获取地形Mesh的顶点、UV和三角形
@@ -171,46 +196,17 @@ namespace LiminalCamera.Photo
 
             return intersectionData;
         }
-        
+
         // 检查三角形是否与锥形视锥体相交
         private bool IsTriangleIntersectingFrustum(Vector3 v0, Vector3 v1, Vector3 v2)
         {
-            // 如果三角形的任意一个顶点在锥体内，或者三角形中心在锥体内，则认为相交
-            bool v0InFrustum = IsInFrustum(v0);
-            bool v1InFrustum = IsInFrustum(v1);
-            bool v2InFrustum = IsInFrustum(v2);
-            
-            // 如果任意顶点在锥体内，则相交
-            if (v0InFrustum || v1InFrustum || v2InFrustum) return true;
-            
-            // 检查三角形中心是否在锥体内
-            Vector3 triangleCenter = (v0 + v1 + v2) / 3f;
-            if (IsInFrustum(triangleCenter)) return true;
-            
-            return false;
+            return PhotoUtil.IsTriangleIntersectingFrustum(v0, v1, v2, photoCamera, currentFrustumHeight, frustumBottomWidth, frustumBottomHeight);
         }
 
         // 检查点是否在锥形视锥体内
         private bool IsInFrustum(Vector3 point)
         {
-            Vector3 localPoint = photoCamera.transform.InverseTransformPoint(point);
-
-            // 检查是否在锥体的Z范围内
-            if (localPoint.z < 0 || localPoint.z > currentFrustumHeight)
-            {
-                return false;
-            }
-
-            // 计算在当前深度下的锥体切面宽高
-            float normalizedDepth = localPoint.z / currentFrustumHeight;
-            float currentWidth = frustumBottomWidth * normalizedDepth;
-            float currentHeight = frustumBottomHeight * normalizedDepth;
-
-            // 检查是否在锥体的XY范围内
-            bool inXRange = Mathf.Abs(localPoint.x) <= currentWidth / 2f;
-            bool inYRange = Mathf.Abs(localPoint.y) <= currentHeight / 2f;
-
-            return inXRange && inYRange;
+            return PhotoUtil.IsInFrustum(point, photoCamera, currentFrustumHeight, frustumBottomWidth, frustumBottomHeight);
         }
     }
 }

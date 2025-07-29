@@ -166,6 +166,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 893265ec3f77c55458e8db5b8c92fea3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  player: {fileID: 751227597}
   levelOffset: {x: 0, y: 0, z: 500}
 --- !u!1 &163186955
 GameObject:
@@ -199,11 +200,6 @@ MonoBehaviour:
   levelBlueprints:
   - {fileID: 11400000, guid: c470b8535bb4a9b4ab87539d9825f094, type: 2}
   - {fileID: 11400000, guid: 4ed81f02cb515614bab9f1ca9ac7c2b1, type: 2}
-  poiSafeDistance: 5
-  largePropSafeDistance: 4
-  smallPropSafeDistance: 2
-  doorSafeDistance: 5
-  extraSafeDistance: 0.5
   maxAttempts: 50
   doorMaxAttempts: 100
 --- !u!4 &163186957
@@ -572,6 +568,12 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 0
+--- !u!1 &751227597 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5848720441561414908, guid: 4e9de429961718a49bc0e79f70cb8749,
+    type: 3}
+  m_PrefabInstance: {fileID: 433253284365803757}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &757997335
 GameObject:
   m_ObjectHideFlags: 0
@@ -752,6 +754,12 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!20 &1781415045 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 5552398715577685572, guid: 4e9de429961718a49bc0e79f70cb8749,
+    type: 3}
+  m_PrefabInstance: {fileID: 433253284365803757}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2136742730
 GameObject:
   m_ObjectHideFlags: 0
@@ -838,7 +846,7 @@ PrefabInstance:
     - target: {fileID: 1473065221909896361, guid: 4e9de429961718a49bc0e79f70cb8749,
         type: 3}
       propertyPath: field of view
-      value: 30
+      value: 40
       objectReference: {fileID: 0}
     - target: {fileID: 3129444873884814295, guid: 4e9de429961718a49bc0e79f70cb8749,
         type: 3}
@@ -852,8 +860,33 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3881118398490971850, guid: 4e9de429961718a49bc0e79f70cb8749,
         type: 3}
+      propertyPath: playerCamera
+      value: 
+      objectReference: {fileID: 1781415045}
+    - target: {fileID: 3881118398490971850, guid: 4e9de429961718a49bc0e79f70cb8749,
+        type: 3}
+      propertyPath: maxStepHeight
+      value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 3881118398490971850, guid: 4e9de429961718a49bc0e79f70cb8749,
+        type: 3}
+      propertyPath: checkStepHeight
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3881118398490971850, guid: 4e9de429961718a49bc0e79f70cb8749,
+        type: 3}
+      propertyPath: groundLayer.m_Bits
+      value: 64
+      objectReference: {fileID: 0}
+    - target: {fileID: 3881118398490971850, guid: 4e9de429961718a49bc0e79f70cb8749,
+        type: 3}
       propertyPath: groundLayerMask.m_Bits
       value: 64
+      objectReference: {fileID: 0}
+    - target: {fileID: 5195186513821379112, guid: 4e9de429961718a49bc0e79f70cb8749,
+        type: 3}
+      propertyPath: m_StepOffset
+      value: 0.55
       objectReference: {fileID: 0}
     - target: {fileID: 5552398715577685572, guid: 4e9de429961718a49bc0e79f70cb8749,
         type: 3}
@@ -897,6 +930,11 @@ PrefabInstance:
       objectReference: {fileID: 757997335}
     - target: {fileID: 6075757751814703510, guid: 4e9de429961718a49bc0e79f70cb8749,
         type: 3}
+      propertyPath: maxFOV
+      value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 6075757751814703510, guid: 4e9de429961718a49bc0e79f70cb8749,
+        type: 3}
       propertyPath: minFOV
       value: 30
       objectReference: {fileID: 0}
@@ -937,8 +975,13 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6075757751814703510, guid: 4e9de429961718a49bc0e79f70cb8749,
         type: 3}
+      propertyPath: zoomSensitivity
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 6075757751814703510, guid: 4e9de429961718a49bc0e79f70cb8749,
+        type: 3}
       propertyPath: maxFrustumHeight
-      value: 80
+      value: 60
       objectReference: {fileID: 0}
     - target: {fileID: 6075757751814703510, guid: 4e9de429961718a49bc0e79f70cb8749,
         type: 3}
@@ -968,12 +1011,12 @@ PrefabInstance:
     - target: {fileID: 6075757751814703510, guid: 4e9de429961718a49bc0e79f70cb8749,
         type: 3}
       propertyPath: maxPlacementDistance
-      value: 30
+      value: 40
       objectReference: {fileID: 0}
     - target: {fileID: 6075757751814703510, guid: 4e9de429961718a49bc0e79f70cb8749,
         type: 3}
       propertyPath: minPlacementDistance
-      value: 5
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 6075757751814703510, guid: 4e9de429961718a49bc0e79f70cb8749,
         type: 3}
@@ -1008,7 +1051,7 @@ PrefabInstance:
     - target: {fileID: 7639543570862320515, guid: 4e9de429961718a49bc0e79f70cb8749,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 2
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7639543570862320515, guid: 4e9de429961718a49bc0e79f70cb8749,
         type: 3}

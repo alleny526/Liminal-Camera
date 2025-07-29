@@ -9,20 +9,16 @@ public class LevelGenerator : MonoBehaviour
     [Header("关卡蓝图")]
     public List<LevelBlueprint> levelBlueprints;
     
-    [Header("Prop间距设置")] // TODO: 要不要移到蓝图里面 -- 如果蓝图里面有不同的设置，可能会更灵活
-    public float poiSafeDistance = 5.0f;
-    public float largePropSafeDistance = 4.0f;
-    public float smallPropSafeDistance = 2.0f;
-    public float doorSafeDistance = 5.0f;
-    public float extraSafeDistance = 0.5f; // 不加这个可能会重叠
-    
     [Header("避让检查次数设置")]
     public int maxAttempts = 50;
     public int doorMaxAttempts = 100;
-    
+
     private int levelEntryCount = 0; // 记录总关卡进入次数，用作关卡蓝图索引
     private int parkEntryCount = 0; // 记录公园进入次数，后续和公园生成随机性相关
     private int forestEntryCount = 0;
+    
+    private GameObject cachedLayerRoot;
+    private GameObject cachedTerrain;
 
     // 已生成Prop的信息（位置、影响半径等）
     [System.Serializable]
@@ -68,6 +64,7 @@ public class LevelGenerator : MonoBehaviour
         LevelBlueprint blueprint = levelBlueprints[curIndex];
 
         GameObject levelRootObj = new GameObject("LevelRoot_" + blueprint.levelType + "_" + pos);
+        cachedLayerRoot = levelRootObj;
         Transform levelRoot = levelRootObj.transform;
         levelRoot.position = pos;
 
@@ -109,9 +106,9 @@ public class LevelGenerator : MonoBehaviour
 
         // 生成POI
         // 位置固定为关卡中心
-        if (blueprint.poiPrefab != null)
+        if (blueprint.poiPrefabs != null)
         {
-            GameObject poiInstance = Instantiate(blueprint.poiPrefab, levelRoot.position, Quaternion.identity, levelRoot);
+            GameObject poiInstance = Instantiate(blueprint.poiPrefabs[0], levelRoot.position, Quaternion.identity, levelRoot);
 
             float poiRadius = GetPropRadius(poiInstance);
             spawnedProps.Add(new SpawnedPropInfo(levelRoot.position, poiRadius, poiInstance));
@@ -141,14 +138,14 @@ public class LevelGenerator : MonoBehaviour
         // 根据blueprint的largePropCount生成额外的随机大型Prop
         // 0.8f就是个magic number，稍微缩小生成范围防止模型突出到地图外
         int successfulLargeProps = GenerateRandomProps(blueprint.largePropPrefabs, blueprint.largePropCount,
-            levelRoot, terrainRadius * 0.8f, spawnedProps, largePropSafeDistance);
+            levelRoot, terrainRadius * 0.8f, spawnedProps, blueprint.largePropSafeDistance);
 
         // 同上，生成小型Prop
         int successfulSmallProps = GenerateRandomProps(blueprint.smallPropPrefabs, blueprint.smallPropCount,
-            levelRoot, terrainRadius, spawnedProps, smallPropSafeDistance);
+            levelRoot, terrainRadius, spawnedProps, blueprint.smallPropSafeDistance);
 
         // 在随机位置生成门，确保不与其他Prop重叠
-        bool doorPlaced = GenerateDoor(blueprint.doorPrefab, levelRoot, terrainRadius * 0.9f, spawnedProps);
+        bool doorPlaced = GenerateDoor(blueprint, levelRoot, terrainRadius * 0.9f, spawnedProps);
     }
 
     // 生成森林关卡
@@ -160,17 +157,17 @@ public class LevelGenerator : MonoBehaviour
         // 用于跟踪已生成Prop的信息，防止重叠
         List<SpawnedPropInfo> spawnedProps = new List<SpawnedPropInfo>();
 
-        GenerateRandomProps(blueprint.largePropPrefabs, blueprint.largePropCount, levelRoot, terrainRadius * 0.8f, spawnedProps, largePropSafeDistance);
-        GenerateRandomProps(blueprint.smallPropPrefabs, blueprint.smallPropCount, levelRoot, terrainRadius, spawnedProps, smallPropSafeDistance);
-
-        // 同样生成门
-        bool doorPlaced = GenerateDoor(blueprint.doorPrefab, levelRoot, terrainRadius * 0.9f, spawnedProps);
+        GenerateRandomProps(blueprint.poiPrefabs, blueprint.poiCount, levelRoot, terrainRadius * 0.8f, spawnedProps, blueprint.poiSafeDistance);
+        GenerateRandomProps(blueprint.largePropPrefabs, blueprint.largePropCount, levelRoot, terrainRadius * 0.8f, spawnedProps, blueprint.largePropSafeDistance);
+        GenerateRandomProps(blueprint.smallPropPrefabs, blueprint.smallPropCount, levelRoot, terrainRadius, spawnedProps, blueprint.smallPropSafeDistance);
     }
 
     // 生成地形
     private float GenerateTerrain(LevelBlueprint blueprint, Transform levelRoot)
     {
         GameObject terrainInstance = Instantiate(blueprint.terrainPrefab, levelRoot.position, Quaternion.identity, levelRoot);
+        cachedTerrain = Instantiate(terrainInstance, levelRoot);
+        cachedTerrain.SetActive(false);
         float terrainRadius = terrainInstance.GetComponentInChildren<Renderer>().bounds.extents.x;
         return terrainRadius;
     }
@@ -213,15 +210,15 @@ public class LevelGenerator : MonoBehaviour
     }
 
     // 生成门
-    private bool GenerateDoor(GameObject doorPrefab, Transform levelRoot, float spawnRadius, List<SpawnedPropInfo> spawnedProps)
+    private bool GenerateDoor(LevelBlueprint blueprint, Transform levelRoot, float spawnRadius, List<SpawnedPropInfo> spawnedProps)
     {
-        if (doorPrefab == null)
+        if (blueprint.doorPrefab == null)
         {
             return false;
         }
 
         // 临时实例化门来获取其半径
-        GameObject tempDoorInstance = Instantiate(doorPrefab, Vector3.zero, Quaternion.identity);
+        GameObject tempDoorInstance = Instantiate(blueprint.doorPrefab, Vector3.zero, Quaternion.identity);
         float doorRadius = GetPropRadius(tempDoorInstance);
         DestroyImmediate(tempDoorInstance);
         // GameObject tempPortalCam = GameObject.FindGameObjectWithTag("PortalCamera");
@@ -229,7 +226,7 @@ public class LevelGenerator : MonoBehaviour
         // TODO: 上述代码原想一并将临时的portal camera销毁，但可能会导致门显示不了下一关画面
 
         // 找一个安全的位置
-        Vector3 doorPos = FindSafePosition(levelRoot.position, spawnRadius, spawnedProps, doorSafeDistance, doorRadius);
+        Vector3 doorPos = FindSafePosition(levelRoot.position, spawnRadius, spawnedProps, blueprint.doorSafeDistance, doorRadius);
 
         // 确定位置和旋转后，生成门
         // 门总是朝向关卡中心
@@ -238,7 +235,7 @@ public class LevelGenerator : MonoBehaviour
             Vector3 lookDirection = -(levelRoot.position - doorPos).normalized;
             Quaternion doorRotation = Quaternion.LookRotation(lookDirection);
 
-            GameObject doorInstance = Instantiate(doorPrefab, doorPos, doorRotation, levelRoot);
+            GameObject doorInstance = Instantiate(blueprint.doorPrefab, doorPos, doorRotation, levelRoot);
             spawnedProps.Add(new SpawnedPropInfo(doorPos, doorRadius, doorInstance));
             return true;
         }
@@ -302,7 +299,7 @@ public class LevelGenerator : MonoBehaviour
         foreach (SpawnedPropInfo existingObj in spawnedProps)
         {
             float distance = Vector3.Distance(newPosition, existingObj.position);
-            float requiredDistance = newPropRadius + existingObj.radius + safeDistance + extraSafeDistance;
+            float requiredDistance = newPropRadius + existingObj.radius + safeDistance + 0.5f;
             if (distance < requiredDistance)
             {
                 return true;
@@ -315,7 +312,7 @@ public class LevelGenerator : MonoBehaviour
     // Radius也许不可靠，但重叠似乎也符合游戏整体调性
     private bool IsPositionSafeWithColliders(Vector3 newPosition, float newPropRadius)
     {
-        Collider[] overlapping = Physics.OverlapSphere(newPosition, newPropRadius + extraSafeDistance);
+        Collider[] overlapping = Physics.OverlapSphere(newPosition, newPropRadius + 0.5f);
 
         foreach (Collider col in overlapping)
         {
@@ -364,5 +361,19 @@ public class LevelGenerator : MonoBehaviour
         }
 
         return safePosition;
+    }
+
+    // 重新生成地形（基于缓存的数据）
+    public GameObject RegenerateTerrain(Transform parent)
+    {
+        if (cachedTerrain == null)
+        {
+            return null;
+        }
+
+        GameObject newTerrain = Instantiate(cachedTerrain, parent);
+        newTerrain.SetActive(true);
+        
+        return newTerrain;
     }
 }

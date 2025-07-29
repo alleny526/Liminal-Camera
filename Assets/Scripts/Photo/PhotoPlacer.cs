@@ -9,10 +9,14 @@ namespace LiminalCamera.Photo
         private Camera mainCamera;
         private float placementDistance;
         private Transform parentTransform;
+        private LayerMask capturableLayer;
+        private LayerMask terrainLayer;
 
-        public PhotoPlacer(Camera camera, float distance)
+        public PhotoPlacer(Camera camera, LayerMask cLayer, LayerMask tLayer, float distance)
         {
             mainCamera = camera;
+            capturableLayer = cLayer;
+            terrainLayer = tLayer;
             placementDistance = distance;
         }
 
@@ -32,6 +36,9 @@ namespace LiminalCamera.Photo
         // 放置照片中的所有内容
         public void PlacePhoto(PhotoData heldPhoto)
         {                      
+            // 首先移除与视锥相交的现有内容
+            RemoveIntersectingContent(heldPhoto);
+            
             // 放置Props
             int placedCount = PlaceProps(heldPhoto.capturedProps);
             
@@ -57,6 +64,10 @@ namespace LiminalCamera.Photo
                 Vector3 finalScale = Vector3.one * propData.localScale * scaleMultiplier;
                                 
                 GameObject newProp = Object.Instantiate(propData.prefab, finalPosition, finalRotation);
+                if (!newProp.activeSelf)
+                {
+                    newProp.SetActive(true);
+                }
                 newProp.transform.localScale = finalScale;
                 
                 if (parentTransform != null)
@@ -124,6 +135,138 @@ namespace LiminalCamera.Photo
             newTerrainPiece.layer = LayerMask.NameToLayer("Terrain");
             
             return newTerrainPiece;
+        }
+
+        // 移除与视锥相交的现有内容
+        private void RemoveIntersectingContent(PhotoData photoData)
+        {
+            RemoveIntersectingTerrainTriangles(photoData);
+            
+            RemoveIntersectingProps(photoData);
+        }
+
+        // 移除与视锥相交的现有地形三角形
+        private void RemoveIntersectingTerrainTriangles(PhotoData photoData)
+        {
+            Collider[] allTerrain = Physics.OverlapSphere(mainCamera.transform.position, photoData.savedFrustumHeight, terrainLayer);
+
+            foreach (Collider terrainCollider in allTerrain)
+            {
+                MeshFilter meshFilter = terrainCollider.GetComponent<MeshFilter>();
+                if (meshFilter == null || meshFilter.sharedMesh == null) continue;
+
+                Mesh terrainMesh = meshFilter.sharedMesh;
+                if (!terrainMesh.isReadable)
+                {
+                    terrainMesh = PhotoUtil.MakeReadableMeshCopy(terrainMesh);
+                }
+
+                Transform terrainTransform = terrainCollider.transform;
+                
+                Vector3[] vertices = terrainMesh.vertices;
+                int[] triangles = terrainMesh.triangles;
+                Vector2[] uvs = terrainMesh.uv;
+                
+                List<Vector3> remainingVertices = new List<Vector3>();
+                List<int> remainingTriangles = new List<int>();
+                List<Vector2> remainingUVs = new List<Vector2>();
+                Dictionary<int, int> vertexMapping = new Dictionary<int, int>();
+                
+                // 检查每个三角形是否与视锥相交
+                for (int i = 0; i < triangles.Length; i += 3)
+                {
+                    int i0 = triangles[i];
+                    int i1 = triangles[i + 1];
+                    int i2 = triangles[i + 2];
+                    
+                    Vector3 v0 = terrainTransform.TransformPoint(vertices[i0]);
+                    Vector3 v1 = terrainTransform.TransformPoint(vertices[i1]);
+                    Vector3 v2 = terrainTransform.TransformPoint(vertices[i2]);
+                    
+                    // 如果三角形不与视锥相交，则保留
+                    if (!PhotoUtil.IsTriangleIntersectingFrustum(v0, v1, v2, mainCamera, photoData.savedFrustumHeight, 
+                                                                 photoData.savedFrustumBottomWidth, photoData.savedFrustumBottomHeight))
+                    {
+                        if (!vertexMapping.ContainsKey(i0))
+                        {
+                            vertexMapping[i0] = remainingVertices.Count;
+                            remainingVertices.Add(vertices[i0]);
+                            if (uvs != null && i0 < uvs.Length)
+                                remainingUVs.Add(uvs[i0]);
+                            else
+                                remainingUVs.Add(Vector2.zero);
+                        }
+                        if (!vertexMapping.ContainsKey(i1))
+                        {
+                            vertexMapping[i1] = remainingVertices.Count;
+                            remainingVertices.Add(vertices[i1]);
+                            if (uvs != null && i1 < uvs.Length)
+                                remainingUVs.Add(uvs[i1]);
+                            else
+                                remainingUVs.Add(Vector2.zero);
+                        }
+                        if (!vertexMapping.ContainsKey(i2))
+                        {
+                            vertexMapping[i2] = remainingVertices.Count;
+                            remainingVertices.Add(vertices[i2]);
+                            if (uvs != null && i2 < uvs.Length)
+                                remainingUVs.Add(uvs[i2]);
+                            else
+                                remainingUVs.Add(Vector2.zero);
+                        }
+                        
+                        remainingTriangles.Add(vertexMapping[i0]);
+                        remainingTriangles.Add(vertexMapping[i1]);
+                        remainingTriangles.Add(vertexMapping[i2]);
+                    }
+                }
+                
+                // 如果有三角形被移除，更新网格
+                if (remainingTriangles.Count < triangles.Length)
+                {
+                    if (remainingTriangles.Count == 0)
+                    {
+                        Object.Destroy(terrainCollider.gameObject);
+                    }
+                    else
+                    {
+                        Mesh newMesh = new Mesh();
+                        newMesh.vertices = remainingVertices.ToArray();
+                        newMesh.triangles = remainingTriangles.ToArray();
+                        if (remainingUVs.Count > 0)
+                            newMesh.uv = remainingUVs.ToArray();
+                        
+                        newMesh.RecalculateNormals();
+                        newMesh.RecalculateBounds();
+                        
+                        meshFilter.mesh = newMesh;
+
+                        MeshCollider meshCollider = terrainCollider.GetComponent<MeshCollider>();
+                        if (meshCollider != null)
+                        {
+                            meshCollider.sharedMesh = newMesh;
+                        }
+                    }
+                }
+            }
+        }
+
+        // 移除与视锥相交的现有物品
+        private void RemoveIntersectingProps(PhotoData photoData)
+        {
+            Collider[] allProps = Physics.OverlapSphere(mainCamera.transform.position, photoData.savedFrustumHeight, capturableLayer);
+
+            foreach (Collider propCollider in allProps)
+            {
+                if (PhotoUtil.IsInFrustum(propCollider.transform.position, mainCamera, photoData.savedFrustumHeight, photoData.savedFrustumBottomWidth, photoData.savedFrustumBottomHeight))
+                {
+                    if (propCollider.GetComponentInParent<Prop>() != null)
+                    {
+                        GameManager.Instance.AddHiddenProp(propCollider.GetComponentInParent<Prop>().gameObject);
+                        propCollider.GetComponentInParent<Prop>().gameObject.SetActive(false);
+                    }
+                }
+            }
         }
     }
 }

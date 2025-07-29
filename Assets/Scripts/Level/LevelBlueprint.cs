@@ -10,8 +10,9 @@ public class LevelBlueprint : ScriptableObject
     public GameObject doorPrefab;
 
     [Header("关卡Prop配置")]
-    public GameObject poiPrefab;
-    
+    public GameObject[] poiPrefabs;
+    public int poiCount;
+
     [Space]
     public GameObject[] largePropPrefabs;
     public int largePropCount;
@@ -19,4 +20,11 @@ public class LevelBlueprint : ScriptableObject
     [Space]
     public GameObject[] smallPropPrefabs;
     public int smallPropCount;
+    
+    [Header("Prop间距设置")]
+    public float poiSafeDistance = 5.0f;
+    public float largePropSafeDistance = 4.0f;
+    public float smallPropSafeDistance = 2.0f;
+    public float doorSafeDistance = 5.0f;
+    // public float extraSafeDistance = 0.5f; // 不加这个可能会重叠
 }

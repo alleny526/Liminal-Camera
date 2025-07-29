@@ -43,11 +43,12 @@ public class PlayerInteraction : MonoBehaviour
     private float currentFOV;
     private float currentFrustumHeight;
     private float placementDistance = 10f;
+    [HideInInspector]
+    public Vector3 playerInitLevelPosition;
 
     // 功能模块
     private PhotoCapturer photoCapturer;
     private PhotoPlacer photoPlacer;
-    private PhotoUtil photoUtil;
 
     void Start()
     {
@@ -67,8 +68,7 @@ public class PlayerInteraction : MonoBehaviour
 
         // 功能模块初始化
         photoCapturer = new PhotoCapturer(photoCamera, capturableLayer, terrainLayer, currentFrustumHeight, frustumBottomWidth, frustumBottomHeight);
-        photoPlacer = new PhotoPlacer(mainCamera, placementDistance);
-        photoUtil = new PhotoUtil(mainCamera, photoCamera, capturableLayer, terrainLayer, screenFadeUI);
+        photoPlacer = new PhotoPlacer(mainCamera, capturableLayer, terrainLayer, placementDistance);
     }
 
     void Update()
@@ -82,18 +82,18 @@ public class PlayerInteraction : MonoBehaviour
     // 但是门asset自带脚本是用的trigger collider，后续看看能否统一
     private void HandleInteractionInput()
     {
-        if (Input.GetKeyDown(KeyCode.E))
-        {
-            RaycastHit hit;
-            if (Physics.Raycast(mainCamera.transform.position, mainCamera.transform.forward, out hit, interactionDistance, interactionLayer))
-            {
-                Prop interactable = hit.collider.GetComponentInParent<Prop>();
-                if (interactable != null)
-                {
-                    interactable.Interact(gameObject);
-                }
-            }
-        }
+        // if (Input.GetKeyDown(KeyCode.E))
+        // {
+        //     RaycastHit hit;
+        //     if (Physics.Raycast(mainCamera.transform.position, mainCamera.transform.forward, out hit, interactionDistance, interactionLayer))
+        //     {
+        //         Prop interactable = hit.collider.GetComponentInParent<Prop>();
+        //         if (interactable != null)
+        //         {
+        //             interactable.Interact(gameObject);
+        //         }
+        //     }
+        // }
     }
 
     // 处理拍摄阶段的缩放
@@ -108,7 +108,6 @@ public class PlayerInteraction : MonoBehaviour
         // 根据FOV计算锥体高度 (FOV越小，锥体高度越大)
         float normalizedFOV = (currentFOV - minFOV) / (maxFOV - minFOV);
         currentFrustumHeight = Mathf.Lerp(maxFrustumHeight, minFrustumHeight, normalizedFOV);
-        Debug.Log("Current Frustum Height: " + currentFrustumHeight);
         
         if (photoCapturer != null)
             photoCapturer.UpdateFrustumParameters(currentFrustumHeight);
@@ -126,7 +125,7 @@ public class PlayerInteraction : MonoBehaviour
         {
             // 根据放置距离计算UI缩放 (距离越近，UI越大)
             float normalizedDistance = (placementDistance - minPlacementDistance) / (maxPlacementDistance - minPlacementDistance);
-            float uiScale = Mathf.Lerp(2.5f, 0.8f, normalizedDistance);
+            float uiScale = Mathf.Lerp(2.5f, 1.0f, normalizedDistance);
             placementUI.transform.localScale = Vector3.one * uiScale;
         }
         
@@ -204,7 +203,7 @@ public class PlayerInteraction : MonoBehaviour
     private IEnumerator TakePhotoSequence()
     {
         aimUI.SetActive(false);
-        if (screenFadeUI != null) yield return StartCoroutine(photoUtil.FadeScreen(true, 0.2f));
+        if (screenFadeUI != null) yield return StartCoroutine(PhotoUtil.FadeScreen(screenFadeUI, true, 0.2f));
 
         // 捕获Props
         List<CapturedPropData> propsInView = photoCapturer.CapturePropsInView();
@@ -213,7 +212,7 @@ public class PlayerInteraction : MonoBehaviour
         TerrainIntersectionData terrainIntersection = photoCapturer.CaptureTerrainIntersectionData();
 
         // 保存照片
-        heldPhoto = photoUtil.SavePhoto(propsInView, terrainIntersection);
+        heldPhoto = photoCapturer.SavePhoto();
         
         heldPhotoUI.texture = heldPhoto.photoImage;
         placementUI.texture = heldPhoto.photoImage;
@@ -224,7 +223,7 @@ public class PlayerInteraction : MonoBehaviour
         mainCamera.enabled = true;
         mainCamera.gameObject.SetActive(true);
 
-        if (screenFadeUI != null) yield return StartCoroutine(photoUtil.FadeScreen(false, 0.3f));
+        if (screenFadeUI != null) yield return StartCoroutine(PhotoUtil.FadeScreen(screenFadeUI, false, 0.3f));
     }
 
     private void PlacePhoto()

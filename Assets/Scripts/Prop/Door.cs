@@ -116,7 +116,6 @@ public class Door : Prop
     {
         if (!isOpen || targetLevel == null) return;
 
-
         CharacterController playerController = player.GetComponent<CharacterController>();
         bool hadController = playerController != null;
         if (hadController)
@@ -148,15 +147,16 @@ public class Door : Prop
         // 设置玩家位置和旋转
         player.position = newPosition;
         player.rotation = newRotation;
-
+        player.GetComponent<PlayerInteraction>().playerInitLevelPosition = newPosition;
+        
         if (hadController)
         {
             playerController.enabled = true;
-            
+
             if (player.GetComponent<PlayerController>() != null)
             {
                 player.GetComponent<PlayerController>().ResetVelocity();
-            }           
+            }
         }
 
         // 通知GameManager玩家已传送，清理旧关卡

@@ -1,49 +1,100 @@
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
-using System.Collections.Generic;
+using UnityEngine.Rendering;
 
 // Photo工具类
-// 目前负责保存照片信息和临时的UI淡入淡出效果
+// 负责提供照片相关的通用静态工具函数和UI效果
 namespace LiminalCamera.Photo
 {
-    public class PhotoUtil
+    public static class PhotoUtil
     {
-        private Camera mainCamera;
-        private Camera photoCamera;
-        private LayerMask capturableLayer;
-        private LayerMask terrainLayer;
-        private Image screenFadeUI;
-
-        public PhotoUtil(Camera mainCam, Camera photoCam, LayerMask cLayer, LayerMask tLayer, Image fade)
+        // 检查点是否在锥形视锥体内
+        public static bool IsInFrustum(Vector3 point, Camera referenceCamera, float frustumHeight, float frustumBottomWidth, float frustumBottomHeight)
         {
-            mainCamera = mainCam;
-            photoCamera = photoCam;
-            capturableLayer = cLayer;
-            terrainLayer = tLayer;
-            screenFadeUI = fade; // 临时渐变效果的UI组件
+            Vector3 localPoint = referenceCamera.transform.InverseTransformPoint(point);
+
+            // 检查是否在锥体的Z范围内
+            if (localPoint.z < 0 || localPoint.z > frustumHeight)
+            {
+                return false;
+            }
+
+            // 计算在当前深度下的锥体切面宽高
+            float normalizedDepth = localPoint.z / frustumHeight;
+            float currentWidth = frustumBottomWidth * normalizedDepth;
+            float currentHeight = frustumBottomHeight * normalizedDepth;
+
+            // 检查是否在锥体的XY范围内
+            bool inXRange = Mathf.Abs(localPoint.x) <= currentWidth / 2f;
+            bool inYRange = Mathf.Abs(localPoint.y) <= currentHeight / 2f;
+
+            return inXRange && inYRange;
         }
 
-        public PhotoData SavePhoto(List<CapturedPropData> propsInView, TerrainIntersectionData terrainIntersection)
+        // 检查三角形是否与锥形视锥体相交
+        public static bool IsTriangleIntersectingFrustum(Vector3 v0, Vector3 v1, Vector3 v2, Camera referenceCamera, float frustumHeight, float frustumBottomWidth, float frustumBottomHeight)
         {
-            photoCamera.cullingMask = capturableLayer | terrainLayer;
-            RenderTexture rt = new RenderTexture(Screen.width, Screen.height, 24);
-            photoCamera.targetTexture = rt;
-            photoCamera.Render();
-            Texture2D photoImage = new Texture2D(rt.width, rt.height, TextureFormat.RGB24, false);
-            RenderTexture.active = rt;
-            photoImage.ReadPixels(new Rect(0, 0, rt.width, rt.height), 0, 0);
-            photoImage.Apply();
-            RenderTexture.active = null;
-            photoCamera.targetTexture = null;
-            Object.Destroy(rt);
+            // 如果三角形的任意一个顶点在锥体内，或者三角形中心在锥体内，则认为相交
+            bool v0InFrustum = IsInFrustum(v0, referenceCamera, frustumHeight, frustumBottomWidth, frustumBottomHeight);
+            bool v1InFrustum = IsInFrustum(v1, referenceCamera, frustumHeight, frustumBottomWidth, frustumBottomHeight);
+            bool v2InFrustum = IsInFrustum(v2, referenceCamera, frustumHeight, frustumBottomWidth, frustumBottomHeight);
 
-            return new PhotoData(photoImage, propsInView, terrainIntersection);
+            // 如果任意顶点在锥体内，则相交
+            if (v0InFrustum || v1InFrustum || v2InFrustum) return true;
+
+            // 检查三角形中心是否在锥体内
+            Vector3 triangleCenter = (v0 + v1 + v2) / 3f;
+            if (IsInFrustum(triangleCenter, referenceCamera, frustumHeight, frustumBottomWidth, frustumBottomHeight)) return true;
+
+            return false;
+        }
+
+        // 获取Mesh的可读副本
+        // 参考自https://discussions.unity.com/t/reading-meshes-at-runtime-that-are-not-enabled-for-read-write/804189/8
+        public static Mesh MakeReadableMeshCopy(Mesh nonReadableMesh)
+        {
+            Mesh meshCopy = new Mesh();
+            meshCopy.indexFormat = nonReadableMesh.indexFormat;
+
+            // Handle vertices
+            GraphicsBuffer verticesBuffer = nonReadableMesh.GetVertexBuffer(0);
+            int totalSize = verticesBuffer.stride * verticesBuffer.count;
+            byte[] data = new byte[totalSize];
+            verticesBuffer.GetData(data);
+            meshCopy.SetVertexBufferParams(nonReadableMesh.vertexCount, nonReadableMesh.GetVertexAttributes());
+            meshCopy.SetVertexBufferData(data, 0, 0, totalSize);
+            verticesBuffer.Release();
+
+            // Handle triangles
+            meshCopy.subMeshCount = nonReadableMesh.subMeshCount;
+            GraphicsBuffer indexesBuffer = nonReadableMesh.GetIndexBuffer();
+            int tot = indexesBuffer.stride * indexesBuffer.count;
+            byte[] indexesData = new byte[tot];
+            indexesBuffer.GetData(indexesData);
+            meshCopy.SetIndexBufferParams(indexesBuffer.count, nonReadableMesh.indexFormat);
+            meshCopy.SetIndexBufferData(indexesData, 0, 0, tot);
+            indexesBuffer.Release();
+
+            // Restore submesh structure
+            uint currentIndexOffset = 0;
+            for (int i = 0; i < meshCopy.subMeshCount; i++)
+            {
+                uint subMeshIndexCount = nonReadableMesh.GetIndexCount(i);
+                meshCopy.SetSubMesh(i, new SubMeshDescriptor((int)currentIndexOffset, (int)subMeshIndexCount));
+                currentIndexOffset += subMeshIndexCount;
+            }
+
+            // Recalculate normals and bounds
+            meshCopy.RecalculateNormals();
+            meshCopy.RecalculateBounds();
+
+            return meshCopy;
         }
 
         // 屏幕淡入淡出效果
         // 临时效果，后续可能更改
-        public IEnumerator FadeScreen(bool fadeIn, float duration)
+        public static IEnumerator FadeScreen(Image screenFadeUI, bool fadeIn, float duration)
         {
             float timer = 0f;
             Color startColor = fadeIn ? new Color(0, 0, 0, 0) : Color.black;

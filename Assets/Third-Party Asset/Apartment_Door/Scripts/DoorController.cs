@@ -83,6 +83,7 @@ public class DoorController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.E) && playerInZone)
         {
             doorOpened = !doorOpened;           //The toggle function of door to open/close
+            Prop interactable = GetComponentInParent<Prop>();
 
             if (doorState == DoorState.Closed && !doorAnim.isPlaying)
             {
@@ -90,6 +91,7 @@ public class DoorController : MonoBehaviour
                 {
                     doorAnim.Play("Door_Open");
                     doorState = DoorState.Opened;
+                    interactable.Interact(interactable.gameObject);
                 }
                 else if (keyNeeded && !gotKey)
                 {
