@@ -50,7 +50,7 @@ public class Door : Prop
         if (portalTrigger != null)
         {
             PortalTeleporter teleporter = portalTrigger.gameObject.AddComponent<PortalTeleporter>();
-            teleporter.Initialize(this);
+            // teleporter.Initialize(this);
         }
     }
 
@@ -104,7 +104,7 @@ public class Door : Prop
         canEnter = true; // 若后续决定需要正面才能进门，则需要修改canEnter逻辑
         canCapture = false;
         
-        GameManager.Instance.LinkNewLevel(this);
+        // GameManager.Instance.SpawnNewLevel(this);
     }
 
     // 设置传送门的目标关卡

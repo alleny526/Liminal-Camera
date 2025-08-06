@@ -35,15 +35,21 @@ namespace LiminalCamera.Photo
 
         // 放置照片中的所有内容
         public void PlacePhoto(PhotoData heldPhoto)
-        {                      
+        {
             // 首先移除与视锥相交的现有内容
             RemoveIntersectingContent(heldPhoto);
-            
+
             // 放置Props
             int placedCount = PlaceProps(heldPhoto.capturedProps);
-            
+
             // 放置地形
-            PlaceTerrain(heldPhoto);
+            GameObject placedTerrain = PlaceTerrain(heldPhoto);
+
+            // 检查是否需要生成画框
+            if (LevelGenerator.Instance != null)
+            {
+                LevelGenerator.Instance.OnPhotoPlaced(heldPhoto.capturedProps, placedTerrain);
+            }
         }
 
         // 放置Props
@@ -82,12 +88,13 @@ namespace LiminalCamera.Photo
         }
 
         // 放置地形
-        private void PlaceTerrain(PhotoData heldPhoto)
+        private GameObject PlaceTerrain(PhotoData heldPhoto)
         {
             if (heldPhoto.terrainIntersection != null)
             {
-                CreateNewTerrainPiece(heldPhoto.terrainIntersection);
+                return CreateNewTerrainPiece(heldPhoto.terrainIntersection);
             }
+            return null;
         }
 
         // 创建新的地形

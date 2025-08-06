@@ -32,10 +32,16 @@ public class PlayerInteraction : MonoBehaviour
     public float maxPlacementDistance = 100f;
 
     [Header("UI元素")]
+    public Canvas photoCanvas;
     public GameObject aimUI;
     public RawImage heldPhotoUI;
     public RawImage placementUI;
     public Image screenFadeUI;
+    public GameObject enterCaptureHintUI;
+    public GameObject captureHintUI;
+    public GameObject enterPlacementHintUI;
+    public GameObject placementHintUI;
+    public GameObject restartHintUI;
 
     // 内部可变状态
     private PhotoData heldPhoto = null;
@@ -53,9 +59,15 @@ public class PlayerInteraction : MonoBehaviour
     void Start()
     {
         // UI初始化
+        photoCanvas.gameObject.SetActive(false);
         aimUI.SetActive(false);
         heldPhotoUI.gameObject.SetActive(false);
         placementUI.gameObject.SetActive(false);
+        enterCaptureHintUI.SetActive(true);
+        enterPlacementHintUI.SetActive(false);
+        captureHintUI.SetActive(false);
+        placementHintUI.SetActive(false);
+        restartHintUI.SetActive(true);
         if (screenFadeUI != null) screenFadeUI.color = new Color(0, 0, 0, 0);
         
         // 状态初始化
@@ -73,27 +85,16 @@ public class PlayerInteraction : MonoBehaviour
 
     void Update()
     {
+        if (GameManager.Instance.IsAtFirstLevel())
+        {
+            photoCanvas.gameObject.SetActive(false);
+            return;
+        }
+        else
+        {
+            photoCanvas.gameObject.SetActive(true);
+        }
         HandlePhotoInput();
-        HandleInteractionInput();
-    }
-
-    // 处理玩家与可交互Prop的交互输入 -- 目前只有门
-    // 由于门asset的交互是E键，所以就用E键交互
-    // 但是门asset自带脚本是用的trigger collider，后续看看能否统一
-    private void HandleInteractionInput()
-    {
-        // if (Input.GetKeyDown(KeyCode.E))
-        // {
-        //     RaycastHit hit;
-        //     if (Physics.Raycast(mainCamera.transform.position, mainCamera.transform.forward, out hit, interactionDistance, interactionLayer))
-        //     {
-        //         Prop interactable = hit.collider.GetComponentInParent<Prop>();
-        //         if (interactable != null)
-        //         {
-        //             interactable.Interact(gameObject);
-        //         }
-        //     }
-        // }
     }
 
     // 处理拍摄阶段的缩放
@@ -125,7 +126,7 @@ public class PlayerInteraction : MonoBehaviour
         {
             // 根据放置距离计算UI缩放 (距离越近，UI越大)
             float normalizedDistance = (placementDistance - minPlacementDistance) / (maxPlacementDistance - minPlacementDistance);
-            float uiScale = Mathf.Lerp(2.5f, 1.0f, normalizedDistance);
+            float uiScale = Mathf.Lerp(7.5f, 6.0f, normalizedDistance);
             placementUI.transform.localScale = Vector3.one * uiScale;
         }
         
@@ -159,12 +160,22 @@ public class PlayerInteraction : MonoBehaviour
                 photoCamera.enabled = true;
                 mainCamera.enabled = false;
                 photoCamera.fieldOfView = currentFOV;
+
+                enterCaptureHintUI.SetActive(false);
+                captureHintUI.SetActive(true);
+                enterPlacementHintUI.SetActive(false);
+                placementHintUI.SetActive(false);
             }
             else
             {
                 isPlacing = true;
                 placementUI.gameObject.SetActive(true);
                 heldPhotoUI.gameObject.SetActive(false);
+
+                enterCaptureHintUI.SetActive(false);
+                captureHintUI.SetActive(false);
+                enterPlacementHintUI.SetActive(false);
+                placementHintUI.SetActive(true);
             }
         }
 
@@ -178,12 +189,22 @@ public class PlayerInteraction : MonoBehaviour
             if (heldPhoto == null)
             {
                 aimUI.SetActive(false);
+
+                enterCaptureHintUI.SetActive(true);
+                captureHintUI.SetActive(false);
+                enterPlacementHintUI.SetActive(false);
+                placementHintUI.SetActive(false);
             }
             else
             {
                 isPlacing = false;
                 placementUI.gameObject.SetActive(false);
                 heldPhotoUI.gameObject.SetActive(true);
+
+                enterCaptureHintUI.SetActive(false);
+                captureHintUI.SetActive(false);
+                enterPlacementHintUI.SetActive(true);
+                placementHintUI.SetActive(false);
             }
         }
 

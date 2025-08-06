@@ -7,11 +7,16 @@ public class GameManager : MonoBehaviour
 
     public GameObject player;
 
-    public Vector3 levelOffset = new Vector3(0, 0, 500f); // 临时设定的新关卡偏移量
+    public Vector3 levelOffset = new Vector3(0, 0, 500f);
 
     private Transform currentLevelRoot;
+    private Transform firstLevelRoot;
     private List<Transform> activeLevels = new List<Transform>();
     private List<GameObject> hiddenProps = new List<GameObject>();
+    
+    // 画框绘画系统状态
+    private Frame pendingFrame = null;
+    private bool waitingForPaintedLevel = false;
 
     void Awake()
     {
@@ -28,9 +33,13 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        currentLevelRoot = LevelGenerator.Instance.SpawnLevel(Vector3.zero);
-        player.transform.position = LevelGenerator.Instance.GetRandomPositionInLevel(currentLevelRoot);
-        player.transform.rotation = Quaternion.LookRotation(currentLevelRoot.position - player.transform.position);
+        // 第一关特殊化处理
+        GameObject firstLevelObject = GameObject.Find("FirstLevel"); 
+        if (firstLevelObject != null)
+        {
+            firstLevelRoot = firstLevelObject.transform;
+            currentLevelRoot = firstLevelRoot;
+        }
         player.GetComponent<PlayerInteraction>().playerInitLevelPosition = player.transform.position;
     }
 
@@ -39,24 +48,69 @@ public class GameManager : MonoBehaviour
         // 检测R键重置关卡
         if (Input.GetKeyDown(KeyCode.R))
         {
+            if (IsAtFirstLevel())
+            {
+                return;
+            }
+            
             RestartLevel();
         }
     }
 
-    // 当门被打开时，创建并链接一个新关卡
-    public void LinkNewLevel(Door entryDoor)
+    public bool IsAtFirstLevel()
     {
-        Vector3 newLevelPosition = currentLevelRoot.position + levelOffset;
+        return firstLevelRoot != null && currentLevelRoot == firstLevelRoot;
+    }
 
-        Transform newLevelRoot = LevelGenerator.Instance.SpawnLevel(newLevelPosition);
-        if (newLevelRoot == null)
+    // 画框激活时开始绘画流程
+    public void SpawnNewLevel(Frame entryFrame)
+    {
+        pendingFrame = entryFrame;
+        waitingForPaintedLevel = true;
+        
+        SetPlayerControlEnabled(false);
+        
+        Vector3 newLevelPosition = currentLevelRoot.position + levelOffset;
+        LevelGenerator.Instance.SpawnLevel(newLevelPosition);
+    }
+
+    // 绘画完成后处理新关卡
+    public void OnPaintedLevelGenerated(Transform newLevelRoot)
+    {
+        if (!waitingForPaintedLevel || pendingFrame == null) return;
+        
+        waitingForPaintedLevel = false;
+        
+        if (newLevelRoot != null)
         {
-            return;
+        activeLevels.Add(newLevelRoot);
+            pendingFrame.SetTargetLevel(newLevelRoot);
+        }
+        
+        pendingFrame = null;
+        SetPlayerControlEnabled(true);
+    }
+
+    // 设置玩家控制是否启用
+    public void SetPlayerControlEnabled(bool enabled)
+    {
+        PlayerController playerController = player.GetComponent<PlayerController>();
+        if (playerController != null)
+        {
+            playerController.enabled = enabled;
         }
 
-        activeLevels.Add(newLevelRoot);
+        PlayerInteraction playerInteraction = player.GetComponent<PlayerInteraction>();
+        if (playerInteraction != null)
+        {
+            playerInteraction.enabled = enabled;
+        }
 
-        entryDoor.SetTargetLevel(newLevelRoot);
+        if (enabled)
+        {
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
     }
 
     // 玩家传送完成后，切换当前关卡并清理旧关卡
@@ -71,20 +125,20 @@ public class GameManager : MonoBehaviour
             CleanupLevel(oldLevelRoot);
             hiddenProps.Clear();
         }
+
+        if (LevelGenerator.Instance != null)
+        {
+            LevelGenerator.Instance.IncrementLevelEntryCount();
+        }
     }
 
     // 清理指定关卡的所有内容
     private void CleanupLevel(Transform levelRoot)
     {
-        if (levelRoot == null) return;
-
-        if (levelRoot == currentLevelRoot)
-        {
-            return;
-        }
+        if (levelRoot == null || levelRoot == currentLevelRoot) return;
 
         activeLevels.Remove(levelRoot);
-
+        
         Destroy(levelRoot.gameObject);
     }
 
@@ -105,9 +159,18 @@ public class GameManager : MonoBehaviour
         return container;
     }
 
+    // 重新开始当前关卡
     public void RestartLevel()
     {
-        if (currentLevelRoot == null)
+        if (currentLevelRoot == null) return;
+        
+        if (IsAtFirstLevel())
+        {
+            return;
+        }
+        
+        // 检查是否正在绘画中，如果是则阻止重置
+        if (PaintingSystem.Instance != null && PaintingSystem.Instance.IsInPaintingMode())
         {
             return;
         }
@@ -132,9 +195,14 @@ public class GameManager : MonoBehaviour
             newTerrain.name = "Terrain";
         }
 
+        LevelGenerator.Instance.SetFrameGenerated(false);
+
         player.GetComponent<CharacterController>().enabled = false;
         player.transform.position = player.GetComponent<PlayerInteraction>().playerInitLevelPosition;
-        player.transform.rotation = Quaternion.LookRotation(currentLevelRoot.position - player.transform.position);
+        Quaternion restartRotation = Quaternion.LookRotation(currentLevelRoot.position - player.transform.position);
+        restartRotation.x = 0;
+        restartRotation.z = 0;
+        player.transform.rotation = restartRotation;
         player.GetComponent<CharacterController>().enabled = true;
     }
 

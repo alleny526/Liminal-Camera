@@ -1,5 +1,27 @@
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
+
+// Prop放置信息的数据结构
+[System.Serializable]
+public class PropPlacementData
+{
+    public PropType propType;
+    public Vector2 normalizedPosition;
+    public float density;
+}
+
+// 线条和Prop的映射关系
+[System.Serializable]
+public class LinePropsMapping
+{
+    public int lineIndex; // 主要靠lineIndex来区分线条
+    public List<GameObject> props = new List<GameObject>();
+    public int maxPlaceableProps = 0; // 用于编辑模式
+
+    public LinePropsMapping(int index) { lineIndex = index; }
+
+}
 
 // 关卡生成器，负责根据蓝图生成关卡内容
 public class LevelGenerator : MonoBehaviour
@@ -8,17 +30,20 @@ public class LevelGenerator : MonoBehaviour
 
     [Header("关卡蓝图")]
     public List<LevelBlueprint> levelBlueprints;
-    
+    [Header("绘画系统")]
+    public PaintingSystem paintingSystem;
     [Header("避让检查次数设置")]
     public int maxAttempts = 50;
-    public int doorMaxAttempts = 100;
 
     private int levelEntryCount = 0; // 记录总关卡进入次数，用作关卡蓝图索引
-    private int parkEntryCount = 0; // 记录公园进入次数，后续和公园生成随机性相关
-    private int forestEntryCount = 0;
-    
-    private GameObject cachedLayerRoot;
-    private GameObject cachedTerrain;
+    private bool waitingForFramePainting = false;
+    private LevelBlueprint pendingBlueprint;
+    private Transform levelRoot;
+    private List<LinePropsMapping> linePropsMappings = new List<LinePropsMapping>();
+    private List<SpawnedPropInfo> allSpawnedPropsInfo = new List<SpawnedPropInfo>();
+    private List<GameObject> generatedTerrainPieces = new List<GameObject>();
+    private bool frameGenerated = false;
+    private int placementCount = 0;
 
     // 已生成Prop的信息（位置、影响半径等）
     [System.Serializable]
@@ -41,7 +66,7 @@ public class LevelGenerator : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject); // 先预留Scene跳转不摧毁实例
+            DontDestroyOnLoad(gameObject);
         }
         else
         {
@@ -50,194 +75,318 @@ public class LevelGenerator : MonoBehaviour
     }
 
     // 生成关卡
-    public Transform SpawnLevel(Vector3 pos)
+    public void SpawnLevel(Vector3 pos)
     {
-        if (levelBlueprints == null || levelBlueprints.Count == 0)
-        {
-            return null;
-        }
+        if (levelBlueprints == null || levelBlueprints.Count == 0) return;
 
-        // 循环使用关卡蓝图 -- 根据关卡进入次数，关卡布置的随机规则也会有区别
-        // 可能后期考虑随机化？
-        // TODO: 目前是同scene下创建不同关卡（利用levelRoot） -- 后期是否考虑新建scene？
+        // 循环使用关卡蓝图
         int curIndex = levelEntryCount % levelBlueprints.Count;
         LevelBlueprint blueprint = levelBlueprints[curIndex];
+        pendingBlueprint = blueprint;
 
-        GameObject levelRootObj = new GameObject("LevelRoot_" + blueprint.levelType + "_" + pos);
-        cachedLayerRoot = levelRootObj;
-        Transform levelRoot = levelRootObj.transform;
+        GameObject levelRootObj = new GameObject("Level_" + blueprint.levelType + "_" + pos);
+        levelRoot = levelRootObj.transform;
         levelRoot.position = pos;
 
         // 创建一个专门用于存放玩家生成内容的子对象
-        // TODO: 在多处判空时会在各处新建，看是否能整合
         GameObject playerGeneratedContainer = new GameObject("PlayerGeneratedContent");
         playerGeneratedContainer.transform.SetParent(levelRoot);
         playerGeneratedContainer.transform.localPosition = Vector3.zero;
 
-        // 增加关卡进入次数
-        levelEntryCount++;
+        // 生成用于预览的地形
+        GameObject terrainInstance = Instantiate(blueprint.terrainPrefab, levelRoot.position, Quaternion.identity, levelRoot);
+        terrainInstance.name = "Terrain";
 
-        // 根据蓝图的关卡类型生成关卡
-        switch (blueprint.levelType)
+        // 由于重置关卡bug，使用LevelInfo存储关卡对应的缓存地形
+        GameObject cachedTerrain = Instantiate(blueprint.terrainPrefab, levelRoot);
+        cachedTerrain.SetActive(false);
+        cachedTerrain.name = "CachedTerrain";
+        LevelInfo levelInfo = levelRootObj.AddComponent<LevelInfo>();
+        levelInfo.Initialize(blueprint, cachedTerrain);
+
+        frameGenerated = false;
+        placementCount = 0;
+        generatedTerrainPieces.Clear();
+        linePropsMappings.Clear();
+        allSpawnedPropsInfo.Clear();
+
+        if (paintingSystem != null)
         {
-            case LevelType.Forest:
-                forestEntryCount++;
-                GenerateForest(blueprint, levelRoot);
-                break;
-            case LevelType.Park:
-                parkEntryCount++; // 记录公园进入次数
-                GeneratePark(blueprint, levelRoot);
-                break;
-            default:
-                break;
+            waitingForFramePainting = true;
+            paintingSystem.StartPainting(blueprint, levelRoot);
         }
-        return levelRoot;
     }
 
-    // 生成公园关卡
-    // 每个关卡都有自己的特殊生成逻辑，但同时会使用随机生成方法
-    private void GeneratePark(LevelBlueprint blueprint, Transform levelRoot)
+    // 绘画完成回调
+    public void OnPaintingCompleted()
     {
-        // 生成地形
-        float terrainRadius = GenerateTerrain(blueprint, levelRoot);
-
-        // 用于跟踪已生成Prop的信息，防止重叠
-        List<SpawnedPropInfo> spawnedProps = new List<SpawnedPropInfo>();
-
-        // 生成POI
-        // 位置固定为关卡中心
-        if (blueprint.poiPrefabs != null)
+        if (waitingForFramePainting && levelRoot != null)
         {
-            GameObject poiInstance = Instantiate(blueprint.poiPrefabs[0], levelRoot.position, Quaternion.identity, levelRoot);
-
-            float poiRadius = GetPropRadius(poiInstance);
-            spawnedProps.Add(new SpawnedPropInfo(levelRoot.position, poiRadius, poiInstance));
-        }
-
-        // 生成规律固定的石头线条
-        if (blueprint.largePropPrefabs.Length > 0)
-        {
-            int lineCount = 2 + parkEntryCount; // 石头线条数量和公园进入次数挂钩 -- 简单的次数使用案例
-            for (int i = 1; i <= lineCount; i++)
+            waitingForFramePainting = false;
+            if (GameManager.Instance != null)
             {
-                float angle = 360f / lineCount * i;
-                Vector3 direction = Quaternion.Euler(0, angle, 0) * Vector3.forward;
-                for (int j = 1; j < 4; j++)
-                {
-                    float distance = terrainRadius * (j / 4f) + Random.Range(-2f, 2f);
-                    Vector3 rockPos = levelRoot.position + direction * distance;
-                    rockPos.y = levelRoot.position.y;
+                GameManager.Instance.OnPaintedLevelGenerated(levelRoot);
+            }
+        }
+    }
 
-                    GameObject rockInstance = Instantiate(blueprint.largePropPrefabs[0], rockPos, Quaternion.Euler(0, Random.Range(0, 360), 0), levelRoot);
-                    float rockRadius = GetPropRadius(rockInstance);
-                    spawnedProps.Add(new SpawnedPropInfo(rockPos, rockRadius, rockInstance));
+    // 根据新画线条生成prop
+    public void UpdateLevelFromPaintLine(Transform levelRoot, LevelBlueprint blueprint, PaintingSystem.PaintLine paintLine)
+    {
+        if (levelRoot == null || blueprint == null) return;
+
+        Renderer terrainRenderer = levelRoot.GetComponentInChildren<Renderer>();
+        float terrainRadius = terrainRenderer != null ? terrainRenderer.bounds.extents.x : 25.0f;
+
+        LinePropsMapping mapping = new LinePropsMapping(linePropsMappings.Count);
+        // 确认线条生成prop的种类、位置和密度
+        List<PropPlacementData> placements = ConvertPaintLineToPlacement(paintLine, -1);
+
+        // 根据种类生成prop
+        GeneratePropsByType(placements, mapping, levelRoot, blueprint, terrainRadius);
+
+        // 初始化该线条的最大可放置prop数量
+        mapping.maxPlaceableProps = (int)(mapping.props.Count / paintLine.saturation);
+        linePropsMappings.Add(mapping);
+    }
+
+    // 根据种类生成prop
+    private void GeneratePropsByType(List<PropPlacementData> placements, LinePropsMapping mapping, Transform levelRoot, LevelBlueprint blueprint, float terrainRadius)
+    {
+        var grouped = placements.GroupBy(p => p.propType);
+        foreach (var group in grouped)
+        {
+            GameObject[] prefabs = null;
+            float safeDistance = 0f;
+
+            switch (group.Key)
+            {
+                case PropType.POI:
+                    prefabs = blueprint.poiPrefabs;
+                    safeDistance = blueprint.poiSafeDistance;
+                    break;
+                case PropType.LargeProp:
+                    prefabs = blueprint.largePropPrefabs;
+                    safeDistance = blueprint.largePropSafeDistance;
+                    break;
+                case PropType.SmallProp:
+                    prefabs = blueprint.smallPropPrefabs;
+                    safeDistance = blueprint.smallPropSafeDistance;
+                    break;
+            }
+
+            if (prefabs != null)
+                GeneratePropsFromPlacements(prefabs, group.ToList(), levelRoot, terrainRadius, allSpawnedPropsInfo, safeDistance, mapping);
+        }
+    }
+
+    // 撤销线条时，摧毁线条对应prop、删除mapping并将后续mapping的lineIndex减1 -- 0
+    // 编辑线条时，摧毁线条对应prop并清除mapping内信息                        -- 1
+    public void RemoveOrClearPropsForLine(int lineIndex, int sign)
+    {
+        LinePropsMapping mapping = linePropsMappings.FirstOrDefault(m => m.lineIndex == lineIndex);
+        if (mapping != null)
+        {
+            foreach (GameObject prop in mapping.props)
+            {
+                if (prop != null)
+                {
+                    allSpawnedPropsInfo.RemoveAll(info => info.gameObject == prop);
+                    DestroyImmediate(prop);
                 }
             }
-        }
 
-        // 根据blueprint的largePropCount生成额外的随机大型Prop
-        // 0.8f就是个magic number，稍微缩小生成范围防止模型突出到地图外
-        int successfulLargeProps = GenerateRandomProps(blueprint.largePropPrefabs, blueprint.largePropCount,
-            levelRoot, terrainRadius * 0.8f, spawnedProps, blueprint.largePropSafeDistance);
-
-        // 同上，生成小型Prop
-        int successfulSmallProps = GenerateRandomProps(blueprint.smallPropPrefabs, blueprint.smallPropCount,
-            levelRoot, terrainRadius, spawnedProps, blueprint.smallPropSafeDistance);
-
-        // 在随机位置生成门，确保不与其他Prop重叠
-        bool doorPlaced = GenerateDoor(blueprint, levelRoot, terrainRadius * 0.9f, spawnedProps);
-    }
-
-    // 生成森林关卡
-    private void GenerateForest(LevelBlueprint blueprint, Transform levelRoot)
-    {
-        // 生成地形
-        float terrainRadius = GenerateTerrain(blueprint, levelRoot);
-
-        // 用于跟踪已生成Prop的信息，防止重叠
-        List<SpawnedPropInfo> spawnedProps = new List<SpawnedPropInfo>();
-
-        GenerateRandomProps(blueprint.poiPrefabs, blueprint.poiCount, levelRoot, terrainRadius * 0.8f, spawnedProps, blueprint.poiSafeDistance);
-        GenerateRandomProps(blueprint.largePropPrefabs, blueprint.largePropCount, levelRoot, terrainRadius * 0.8f, spawnedProps, blueprint.largePropSafeDistance);
-        GenerateRandomProps(blueprint.smallPropPrefabs, blueprint.smallPropCount, levelRoot, terrainRadius, spawnedProps, blueprint.smallPropSafeDistance);
-    }
-
-    // 生成地形
-    private float GenerateTerrain(LevelBlueprint blueprint, Transform levelRoot)
-    {
-        GameObject terrainInstance = Instantiate(blueprint.terrainPrefab, levelRoot.position, Quaternion.identity, levelRoot);
-        cachedTerrain = Instantiate(terrainInstance, levelRoot);
-        cachedTerrain.SetActive(false);
-        float terrainRadius = terrainInstance.GetComponentInChildren<Renderer>().bounds.extents.x;
-        return terrainRadius;
-    }
-
-    // 随机生成指定数量指定类型Prop
-    private int GenerateRandomProps(GameObject[] propPrefabs, int propCount, Transform levelRoot,
-        float spawnRadius, List<SpawnedPropInfo> spawnedProps, float safeDistance)
-    {
-        if (propPrefabs == null || propPrefabs.Length == 0 || propCount <= 0)
-        {
-            return 0;
-        }
-
-        int successfulPropsCount = 0;
-        for (int i = 0; i < propCount; i++)
-        {
-            // 预先选择一个Prop预制体来计算其大小
-            int propIndex = Random.Range(0, propPrefabs.Length);
-            GameObject selectedPrefab = propPrefabs[propIndex];
-
-            // TODO: 每个都实例化会不会有性能问题？考虑循环前每个prop先有个临时实例，最后一并销毁。
-            GameObject tempInstance = Instantiate(selectedPrefab, Vector3.zero, Quaternion.identity);
-            float propRadius = GetPropRadius(tempInstance);
-            DestroyImmediate(tempInstance);
-
-            // 尝试找到一个安全的位置
-            Vector3 propPos = FindSafePosition(levelRoot.position, spawnRadius, spawnedProps, safeDistance, propRadius);
-
-            if (propPos != Vector3.zero)
+            if (sign == 0)
             {
-                GameObject propInstance = Instantiate(selectedPrefab, propPos, Quaternion.Euler(0, Random.Range(0, 360), 0), levelRoot);
-
-                // 更新跟踪列表
-                spawnedProps.Add(new SpawnedPropInfo(propPos, propRadius, propInstance));
-                successfulPropsCount++;
+                linePropsMappings.Remove(mapping);
+            }
+            else
+            {
+                mapping.props.Clear();
             }
         }
-
-        return successfulPropsCount;
     }
 
-    // 生成门
-    private bool GenerateDoor(LevelBlueprint blueprint, Transform levelRoot, float spawnRadius, List<SpawnedPropInfo> spawnedProps)
+    // 编辑线条时，摧毁线条对应prop并重新生成
+    public void UpdatePropsForLine(int lineIndex, PaintingSystem.PaintLine updatedLine)
     {
-        if (blueprint.doorPrefab == null)
+        LinePropsMapping mapping = linePropsMappings.FirstOrDefault(m => m.lineIndex == lineIndex);
+        if (mapping != null)
         {
-            return false;
+            RemoveOrClearPropsForLine(lineIndex, 1);
+
+            if (levelRoot != null && pendingBlueprint != null)
+            {
+                Renderer terrainRenderer = levelRoot.GetComponentInChildren<Renderer>();
+                float terrainRadius = terrainRenderer != null ? terrainRenderer.bounds.extents.x : 25.0f;
+
+                int targetCount = Mathf.RoundToInt(mapping.maxPlaceableProps * updatedLine.saturation);
+                targetCount = Mathf.Max(1, targetCount); // 线条饱和度最小0.1f，至少1个prop
+
+                // 根据更新后的饱和度调整最大prop生成数量
+                List<PropPlacementData> placements = ConvertPaintLineToPlacement(updatedLine, targetCount);
+                GeneratePropsByType(placements, mapping, levelRoot, pendingBlueprint, terrainRadius);
+            }
+        }
+    }
+
+    // 根据单一线条确认prop放置信息（种类、位置和密度）
+    private List<PropPlacementData> ConvertPaintLineToPlacement(PaintingSystem.PaintLine paintLine, int maxCount = -1)
+    {
+        List<PropPlacementData> placements = new List<PropPlacementData>();
+
+        if (paintLine.points.Count < 2) return placements;
+
+        int finalCount;
+        if (maxCount > 0)
+        {
+            finalCount = maxCount;
+        }
+        else
+        {
+            float totalLength = 0f;
+            // 根据线条长度计算prop生成数量 -- 如果用点数，会因为鼠标移动太快而变化太大
+            for (int i = 1; i < paintLine.points.Count; i++)
+                totalLength += Vector2.Distance(paintLine.points[i - 1], paintLine.points[i]);
+            finalCount = Mathf.Max(1, Mathf.RoundToInt(totalLength * 0.1f)); // 至少生成1个prop
         }
 
-        // 找一个安全的位置
-        Vector3 doorPos = FindSafePosition(levelRoot.position, spawnRadius, spawnedProps, blueprint.doorSafeDistance, 1.0f);
-
-        // 确定位置和旋转后，生成门
-        // 门总是朝向关卡中心
-        if (doorPos != Vector3.zero)
+        for (int i = 0; i < finalCount; i++)
         {
-            Vector3 lookDirection = -(levelRoot.position - doorPos).normalized;
-            Quaternion doorRotation = Quaternion.LookRotation(lookDirection);
+            // 根据prop生成顺位/总prop个数（标化位置）结合线条点位计算位置
+            float t = finalCount > 1 ? (float)i / (finalCount - 1) : 0.5f;
+            Vector2 pointOnLine = GetPointAlongLine(paintLine.points, t);
 
-            GameObject doorInstance = Instantiate(blueprint.doorPrefab, doorPos, doorRotation, levelRoot);
-            spawnedProps.Add(new SpawnedPropInfo(doorPos, 1.0f, doorInstance));
-            return true;
+            Vector2 normalizedPos = new Vector2(
+                pointOnLine.x / PaintingSystem.Instance.canvasSize,
+                pointOnLine.y / PaintingSystem.Instance.canvasSize
+            ) + Random.insideUnitCircle * 0.02f;
+
+            normalizedPos = new Vector2(Mathf.Clamp01(normalizedPos.x), Mathf.Clamp01(normalizedPos.y));
+
+            placements.Add(new PropPlacementData
+            {
+                propType = paintLine.propType,
+                normalizedPosition = normalizedPos,
+                density = paintLine.saturation
+            });
         }
-        return false;
+
+        return placements;
+    }
+
+    // 根据prop及线条上点的顺位确定位置
+    private Vector2 GetPointAlongLine(List<Vector2> points, float norm)
+    {
+        if (points.Count < 2) return points[0];
+        if (norm <= 0f) return points[0];
+        if (norm >= 1f) return points[points.Count - 1];
+
+        float totalLength = 0f;
+        List<float> segmentLengths = new List<float>();
+
+        for (int i = 1; i < points.Count; i++)
+        {
+            float segmentLength = Vector2.Distance(points[i - 1], points[i]);
+            segmentLengths.Add(segmentLength);
+            totalLength += segmentLength;
+        }
+
+        float targetDistance = totalLength * norm;
+        float currentDistance = 0f;
+
+        // 段落式增加距离来找到目标距离的近似对应点位
+        for (int i = 0; i < segmentLengths.Count; i++)
+        {
+            if (currentDistance + segmentLengths[i] >= targetDistance)
+            {
+                float t = segmentLengths[i] > 0 ? (targetDistance - currentDistance) / segmentLengths[i] : 0f;
+                return Vector2.Lerp(points[i], points[i + 1], t);
+            }
+            currentDistance += segmentLengths[i];
+        }
+
+        return points[points.Count - 1];
+    }
+
+    // 根据放置信息生成prop
+    private void GeneratePropsFromPlacements(GameObject[] propPrefabs, List<PropPlacementData> placements, Transform levelRoot, float terrainRadius, List<SpawnedPropInfo> spawnedProps, float safeDistance, LinePropsMapping mapping)
+    {
+        if (propPrefabs == null || propPrefabs.Length == 0 || placements.Count == 0) return;
+
+        foreach (var placement in placements)
+        {
+            Vector2 normalizedPos = placement.normalizedPosition;
+            Vector3 worldPos = levelRoot.position + new Vector3(
+                (normalizedPos.x - 0.5f) * 2f * terrainRadius,
+                0,
+                (normalizedPos.y - 0.5f) * 2f * terrainRadius);
+
+            GameObject selectedPrefab = propPrefabs[Random.Range(0, propPrefabs.Length)];
+            float propRadius = GetPropRadius(selectedPrefab);
+
+            RaycastHit hit;
+            if (Physics.Raycast(worldPos + Vector3.up * 10f, Vector3.down, out hit, 25f))
+            {
+                worldPos.y = hit.point.y;
+                if (hit.collider.GetComponentInParent<Prop>() != null) continue; // 不能放在prop上
+            }
+
+            // 生成逻辑改为确认的位置，而非寻找随机位置
+            // 所以这里判断重叠即可
+            if (!IsPositionOverlapping(worldPos, propRadius, spawnedProps, safeDistance) && IsPositionSafeWithColliders(worldPos, propRadius))
+            {
+                GameObject propInstance = Instantiate(selectedPrefab, worldPos, Quaternion.Euler(0, Random.Range(0, 360), 0), levelRoot);
+                // 更新跟踪列表
+                SpawnedPropInfo propInfo = new SpawnedPropInfo(worldPos, propRadius, propInstance);
+                spawnedProps.Add(propInfo);
+                mapping.props.Add(propInstance);
+            }
+        }
+    }
+
+    // 简易画框生成逻辑
+    public void OnPhotoPlaced(List<LiminalCamera.Photo.CapturedPropData> capturedProps, GameObject terrainPiece)
+    {
+        placementCount++;
+        if (frameGenerated) return;
+
+        if (terrainPiece != null && !generatedTerrainPieces.Contains(terrainPiece))
+            generatedTerrainPieces.Add(terrainPiece);
+
+        // 捕捉到POI/5个以上prop/放置3次以上照片
+        bool shouldGenerate = capturedProps.Any(prop => prop.prefab.GetComponent<Prop>() is PointOfInterest) || capturedProps.Count >= 5 || placementCount >= 3;
+
+        if (shouldGenerate && generatedTerrainPieces.Count > 0)
+            GenerateFrameOnTerrain();
+    }
+
+    // 生成画框
+    private void GenerateFrameOnTerrain()
+    {
+        if (frameGenerated || pendingBlueprint?.framePrefab == null) return;
+
+        GameObject targetTerrain = generatedTerrainPieces.LastOrDefault();
+        if (targetTerrain == null) return;
+
+        Renderer terrainRenderer = targetTerrain.GetComponent<Renderer>();
+        if (terrainRenderer == null) return;
+
+        Bounds terrainBounds = terrainRenderer.bounds;
+        float terrainRadius = Mathf.Min(terrainBounds.size.x, terrainBounds.size.z) * 0.4f;
+        Vector3 framePos = FindSafePosition(terrainBounds.center, terrainRadius, allSpawnedPropsInfo, pendingBlueprint.frameSafeDistance, 1.0f, targetTerrain);
+
+        if (framePos != Vector3.zero)
+        {
+            Vector3 lookDirection = (terrainBounds.center - framePos).normalized;
+            Quaternion frameRotation = Quaternion.LookRotation(lookDirection);
+            Instantiate(pendingBlueprint.framePrefab, framePos + Vector3.up * 1.7f, frameRotation, GameManager.Instance.GetPlayerGeneratedContentContainer());
+            frameGenerated = true;
+        }
     }
 
     // 查找安全位置
-    // 在指定范围内随机寻找一个不与其他Prop重叠的位置
-    // 如果找不到合适位置，则返回Vector3.zero
-    private Vector3 FindSafePosition(Vector3 centerPos, float spawnRadius, List<SpawnedPropInfo> spawnedProps, float safeDistance, float propRadius)
+    private Vector3 FindSafePosition(Vector3 centerPos, float spawnRadius, List<SpawnedPropInfo> spawnedProps, float safeDistance, float propRadius, GameObject specificTerrain = null)
     {
         for (int attempt = 0; attempt < maxAttempts; attempt++)
         {
@@ -246,24 +395,31 @@ public class LevelGenerator : MonoBehaviour
 
             // 针对凹凸地形，利用射线判断位置y值
             RaycastHit hit;
-            Vector3 rayStart = candidatePos + Vector3.up * 5f;
-            if (Physics.Raycast(rayStart, Vector3.down, out hit, 15f))
+            if (Physics.Raycast(candidatePos + Vector3.up * 5f, Vector3.down, out hit, 15f))
             {
                 candidatePos.y = hit.point.y;
-                if (hit.collider != null && hit.collider.GetComponentInParent<Prop>() != null)
-                {
-                    continue;
-                }
-            }
 
-            if (!IsPositionOverlapping(candidatePos, propRadius, spawnedProps, safeDistance))
-            {
-                if (!IsPositionSafeWithColliders(candidatePos, propRadius))
+                // 生成画框用
+                if (specificTerrain != null)
                 {
-                    continue;
+                    if (hit.collider.gameObject == specificTerrain && !IsPositionOverlapping(candidatePos, propRadius, spawnedProps, safeDistance))
+                        return candidatePos;
                 }
+                // 寻找传送位置用
+                else
+                {
+                    if (hit.collider.GetComponentInParent<Prop>() != null) continue;
 
-                return candidatePos;
+                    if (!IsPositionOverlapping(candidatePos, propRadius, spawnedProps, safeDistance))
+                    {
+                        if (!IsPositionSafeWithColliders(candidatePos, propRadius))
+                        {
+                            continue;
+                        }
+
+                        return candidatePos;
+                    }
+                }
             }
         }
         return Vector3.zero;
@@ -312,8 +468,6 @@ public class LevelGenerator : MonoBehaviour
 
         foreach (Collider col in overlapping)
         {
-            // if (col.isTrigger) continue;
-            // if (col.gameObject.layer == LayerMask.NameToLayer("Terrain")) continue;
             if (col.gameObject.tag != "Prop") continue;
 
             return false;
@@ -341,8 +495,6 @@ public class LevelGenerator : MonoBehaviour
         // 这里是取新关卡的所有生成Prop集合
         foreach (Collider col in allColliders)
         {
-            // if (col.isTrigger) continue;
-            // if (col.gameObject.layer == LayerMask.NameToLayer("Terrain")) continue;
             if (col.gameObject.tag != "Prop") continue;
 
             float objRadius = GetPropRadius(col.gameObject);
@@ -360,16 +512,27 @@ public class LevelGenerator : MonoBehaviour
     }
 
     // 重新生成地形（基于缓存的数据）
-    public GameObject RegenerateTerrain(Transform parent)
+    public GameObject RegenerateTerrain(Transform levelRoot)
     {
-        if (cachedTerrain == null)
-        {
-            return null;
-        }
+        if (levelRoot == null) return null;
 
-        GameObject newTerrain = Instantiate(cachedTerrain, parent);
+        LevelInfo levelInfo = levelRoot.GetComponent<LevelInfo>();
+        if (levelInfo == null || levelInfo.cachedTerrainPrefab == null) return null;
+
+        GameObject newTerrain = Instantiate(levelInfo.cachedTerrainPrefab, levelRoot);
         newTerrain.SetActive(true);
+        newTerrain.name = "Terrain";
         
         return newTerrain;
+    }
+
+    public void SetFrameGenerated(bool generated)
+    {
+        frameGenerated = generated;
+    }
+
+    public void IncrementLevelEntryCount()
+    {
+        levelEntryCount++;
     }
 }
