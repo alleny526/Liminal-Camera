@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51060870cbd512d48a849c9c2dd9a408, type: 3}
+  m_Name: Forest
+  m_EditorClassIdentifier: 
+  levelType: 2
+  terrainPrefab: {fileID: 1686021177304871604, guid: b1ae171c133f80c48bc3309ff4991a8f, type: 3}
+  framePrefab: {fileID: 3772175684896796138, guid: a4ff480a6110db44e883a18a3c3d6eaf, type: 3}
+  poiPrefabs:
+  - {fileID: 3087294834464760471, guid: 25ab84ac3228d4c4fb6f30ea1d5eea86, type: 3}
+  largePropPrefabs:
+  - {fileID: 2222111361404534124, guid: 271516cb70855624eba597564c6fdb80, type: 3}
+  - {fileID: 4661435515762455780, guid: 9b006167252dd574c886678d8d7045e5, type: 3}
+  - {fileID: 6941765000743290380, guid: c148619cd5d894d419a5a13054115393, type: 3}
+  - {fileID: 2807449429036958551, guid: 8a63f92f034d657439a8f1787496ba5c, type: 3}
+  - {fileID: 9069115365609291303, guid: a90bf1eaae20c1640ae647b222d97e7e, type: 3}
+  smallPropPrefabs:
+  - {fileID: 1493958779012120596, guid: 9eef9fac5d779f6419ccc8f348b892b2, type: 3}
+  - {fileID: 4263922822445002727, guid: 6ca56c5531b702047b0eebc3a1d8ee3a, type: 3}
+  - {fileID: 6239969156481229051, guid: b895347bd6a2a934799656c4c4902b9d, type: 3}
+  - {fileID: 38335279662140195, guid: 2d40455f5e5aa064d8127ae2b476780c, type: 3}
+  - {fileID: 5186735023776687486, guid: 0b5c45fce8966394d941a2794a5f2490, type: 3}
+  - {fileID: 3899520030806763256, guid: 8805fc2b8ff905b4e91c261e78e23176, type: 3}
+  - {fileID: 8903058273634794869, guid: b640043f3d32fee46a058d5fd3c88fd7, type: 3}
+  - {fileID: 3356751432538110193, guid: 9c6bfacf74254b7459675b161a0758ae, type: 3}
+  - {fileID: 4385080170328260021, guid: cdb381812c246134fab0f620efa65fdd, type: 3}
+  - {fileID: 5440707293445505367, guid: 5619c997d1b692f4ba5ca44606cfcde8, type: 3}
+  - {fileID: 7405846476849542632, guid: 3536902095fa15a4c81d992d479db6f2, type: 3}
+  - {fileID: 5202732821079448320, guid: 0660a493cf9b376408b91a9fe5d1549f, type: 3}
+  - {fileID: 4680757731160225450, guid: 5e67284c13772e546bd55e9849925b6d, type: 3}
+  - {fileID: 8783306491908617939, guid: c7f84247e85959349a86f479461eb465, type: 3}
+  - {fileID: 1576488453971893466, guid: 8e3a5a0060f69ea4db2c5dbc408e08e1, type: 3}
+  - {fileID: 108507113624723981, guid: bbcabd52825384b4585d76b0308f8196, type: 3}
+  maxPOIPaint: 100
+  maxLargePropPaint: 1500
+  maxSmallPropPaint: 2000
+  poiSafeDistance: 3
+  largePropSafeDistance: 2
+  smallPropSafeDistance: 1
+  frameSafeDistance: 10

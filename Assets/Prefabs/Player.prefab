@@ -193,7 +193,7 @@ MonoBehaviour:
     m_Bits: 0
   capturableLayer:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 0
   terrainLayer:
     serializedVersion: 2
     m_Bits: 0
@@ -207,10 +207,17 @@ MonoBehaviour:
   zoomSensitivity: 10
   minPlacementDistance: 2
   maxPlacementDistance: 50
+  photoCanvas: {fileID: 0}
   aimUI: {fileID: 0}
   heldPhotoUI: {fileID: 0}
   placementUI: {fileID: 0}
   screenFadeUI: {fileID: 0}
+  enterCaptureHintUI: {fileID: 0}
+  captureHintUI: {fileID: 0}
+  enterPlacementHintUI: {fileID: 0}
+  placementHintUI: {fileID: 0}
+  restartHintUI: {fileID: 0}
+  playerInitLevelPosition: {x: 0, y: 0, z: 0}
 --- !u!143 &5195186513821379112
 CharacterController:
   m_ObjectHideFlags: 0

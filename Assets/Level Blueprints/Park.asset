@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51060870cbd512d48a849c9c2dd9a408, type: 3}
+  m_Name: Park
+  m_EditorClassIdentifier: 
+  levelType: 1
+  terrainPrefab: {fileID: 6628327301752842575, guid: 18de55eaef51f3042ba49d9dd13e48e5, type: 3}
+  framePrefab: {fileID: 3772175684896796138, guid: a4ff480a6110db44e883a18a3c3d6eaf, type: 3}
+  poiPrefabs:
+  - {fileID: 2817329950444559287, guid: 1af938230b81c824e8f392cb5c11000d, type: 3}
+  largePropPrefabs:
+  - {fileID: 7711052441184964064, guid: 9d28153812e89a5419be9f9b163203c7, type: 3}
+  smallPropPrefabs:
+  - {fileID: 5450710873069496276, guid: 04229ce6df72cc2488d652e4a4d15a30, type: 3}
+  - {fileID: 7816631969114809938, guid: 4abd2f9487a85ea49bd868fdf31ef6dc, type: 3}
+  maxPOIPaint: 100
+  maxLargePropPaint: 1500
+  maxSmallPropPaint: 2000
+  poiSafeDistance: 3
+  largePropSafeDistance: 2
+  smallPropSafeDistance: 1
+  frameSafeDistance: 10

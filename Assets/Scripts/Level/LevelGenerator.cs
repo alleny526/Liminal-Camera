@@ -380,7 +380,7 @@ public class LevelGenerator : MonoBehaviour
         {
             Vector3 lookDirection = (terrainBounds.center - framePos).normalized;
             Quaternion frameRotation = Quaternion.LookRotation(lookDirection);
-            Instantiate(pendingBlueprint.framePrefab, framePos + Vector3.up * 1.7f, frameRotation, GameManager.Instance.GetPlayerGeneratedContentContainer());
+            Instantiate(pendingBlueprint.framePrefab, framePos + Vector3.up * 2.5f, frameRotation, GameManager.Instance.GetPlayerGeneratedContentContainer());
             frameGenerated = true;
         }
     }
