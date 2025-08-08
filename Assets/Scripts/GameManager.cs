@@ -9,6 +9,8 @@ public class GameManager : MonoBehaviour
 
     public Vector3 levelOffset = new Vector3(0, 0, 500f);
 
+    public Canvas gameEndCanvas;
+
     private Transform currentLevelRoot;
     private Transform firstLevelRoot;
     private List<Transform> activeLevels = new List<Transform>();
@@ -41,6 +43,11 @@ public class GameManager : MonoBehaviour
             currentLevelRoot = firstLevelRoot;
         }
         player.GetComponent<PlayerInteraction>().playerInitLevelPosition = player.transform.position;
+        
+        if (gameEndCanvas != null)
+        {
+            gameEndCanvas.gameObject.SetActive(false);
+        }
     }
 
     void Update()
@@ -120,7 +127,9 @@ public class GameManager : MonoBehaviour
 
         currentLevelRoot = newLevelRoot;
 
-        if (oldLevelRoot != null && oldLevelRoot != newLevelRoot)
+        bool isReturningToFirstLevel = (newLevelRoot == firstLevelRoot);
+        
+        if (oldLevelRoot != null && oldLevelRoot != newLevelRoot && !isReturningToFirstLevel)
         {
             CleanupLevel(oldLevelRoot);
             hiddenProps.Clear();
@@ -135,7 +144,7 @@ public class GameManager : MonoBehaviour
     // 清理指定关卡的所有内容
     private void CleanupLevel(Transform levelRoot)
     {
-        if (levelRoot == null || levelRoot == currentLevelRoot) return;
+        if (levelRoot == null || levelRoot == currentLevelRoot || levelRoot == firstLevelRoot) return;
 
         activeLevels.Remove(levelRoot);
         
@@ -224,6 +233,19 @@ public class GameManager : MonoBehaviour
         if (propObj != null && !hiddenProps.Contains(propObj))
         {
             hiddenProps.Add(propObj);
+        }
+    }
+
+    public void ShowGameEndUI()
+    {
+        if (gameEndCanvas != null)
+        {
+            gameEndCanvas.gameObject.SetActive(true);
+            
+            SetPlayerControlEnabled(false);
+            
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
         }
     }
 }

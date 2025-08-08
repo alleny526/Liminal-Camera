@@ -397,9 +397,19 @@ public class LevelGenerator : MonoBehaviour
 
         if (framePos != Vector3.zero)
         {
-            Vector3 lookDirection = (terrainBounds.center - framePos).normalized;
+            Vector3 lookDirection = (framePos - terrainBounds.center).normalized;
             Quaternion frameRotation = Quaternion.LookRotation(lookDirection);
-            Instantiate(pendingBlueprint.framePrefab, framePos + Vector3.up * 2.5f, frameRotation, GameManager.Instance.GetPlayerGeneratedContentContainer());
+            GameObject frameInstance = Instantiate(pendingBlueprint.framePrefab, framePos + Vector3.up * 2.5f, frameRotation, GameManager.Instance.GetPlayerGeneratedContentContainer());
+                        
+            if (levelEntryCount == levelBlueprints.Count)
+            {
+                Frame frameComponent = frameInstance.GetComponent<Frame>();
+                if (frameComponent != null)
+                {
+                    frameComponent.isReturnToFirstLevel = true;
+                }
+            }
+            
             frameGenerated = true;
         }
     }

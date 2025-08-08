@@ -16,6 +16,9 @@ public class Frame : Prop
     [HideInInspector]
     public Vector3 virtualCameraPosition;
 
+    [HideInInspector]
+    public bool isReturnToFirstLevel = false;
+
     private Camera portalCamera;
     private RenderTexture renderTexture;
     private bool isActivated = false;
@@ -89,15 +92,23 @@ public class Frame : Prop
             portalRenderer.transform.localEulerAngles = new Vector3(0.0f, 0.0f, 0.0f);
         }
         
-        // 计算玩家相机相对于当前画框的位置和旋转
-        Vector3 relativePosition = transform.InverseTransformPoint(mainCamera.transform.position);
-        Quaternion relativeRotation = Quaternion.Inverse(transform.rotation) * mainCamera.transform.rotation;
+        if (isReturnToFirstLevel)
+        {
+            portalCamera.transform.position = new Vector3(-26f, 1.46f, 4f);
+            portalCamera.transform.rotation = Quaternion.Euler(0, -270, 0);
+        }
+        else
+        {
+            // 计算玩家相机相对于当前画框的位置和旋转
+            Vector3 relativePosition = transform.InverseTransformPoint(mainCamera.transform.position);
+            Quaternion relativeRotation = Quaternion.Inverse(transform.rotation) * mainCamera.transform.rotation;
 
-        // 在目标关卡中应用相同的相对变换
-        Vector3 portalCamPosition = virtualCameraPosition + Vector3.forward * relativePosition.z + Vector3.right * relativePosition.x + Vector3.up * relativePosition.y + Vector3.up * 2.0f;
-        Quaternion portalCamRotation = relativeRotation;
-        
-        portalCamera.transform.SetPositionAndRotation(portalCamPosition, portalCamRotation);
+            // 在目标关卡中应用相同的相对变换
+            Vector3 portalCamPosition = virtualCameraPosition + Vector3.forward * relativePosition.z + Vector3.right * relativePosition.x + Vector3.up * relativePosition.y + Vector3.up * 2.0f;
+            Quaternion portalCamRotation = relativeRotation;
+            
+            portalCamera.transform.SetPositionAndRotation(portalCamPosition, portalCamRotation);
+        }
 
         portalCamera.fieldOfView = mainCamera.fieldOfView;
         portalCamera.aspect = 1.0f; // 画框的宽高比
@@ -115,8 +126,20 @@ public class Frame : Prop
         if (interactionPrompt != null)
             interactionPrompt.SetActive(false);
 
-        // 通过GameManager触发关卡生成
-        GameManager.Instance.SpawnNewLevel(this);
+        // 回到初始关卡
+        if (isReturnToFirstLevel)
+        {
+            GameObject firstLevelObject = GameObject.Find("FirstLevel");
+            if (firstLevelObject != null)
+            {
+                SetTargetLevel(firstLevelObject.transform);
+            }
+        }
+        else
+        {
+            // 通过GameManager触发关卡生成
+            GameManager.Instance.SpawnNewLevel(this);
+        }
     }
 
     // 设置传送门的目标关卡
@@ -126,7 +149,14 @@ public class Frame : Prop
         
         if (level != null)
         {
-            virtualCameraPosition = LevelGenerator.Instance.GetRandomPositionInLevel(level);
+            if (isReturnToFirstLevel)
+            {
+                virtualCameraPosition = new Vector3(-26f, 1.46f, 4f);
+            }
+            else
+            {
+                virtualCameraPosition = LevelGenerator.Instance.GetRandomPositionInLevel(level);
+            }
             isActivated = true;
             canEnter = true;
             canCapture = false;
@@ -145,24 +175,35 @@ public class Frame : Prop
             playerController.enabled = false;
         }
 
-        // 计算传送位置和旋转
-        Vector3 relativePosition = transform.InverseTransformPoint(player.position);
-        Quaternion relativeRotation = Quaternion.Inverse(transform.rotation) * player.rotation;
-        relativeRotation.x = 0;
-        relativeRotation.z = 0;
+        Vector3 newPosition;
+        Quaternion newRotation;
 
-        Vector3 newPosition = virtualCameraPosition + (Vector3.forward * relativePosition.z + Vector3.right * relativePosition.x + Vector3.up * relativePosition.y);     
-        Quaternion newRotation = relativeRotation;
-        
-        // 使用射线检测找到实际的地面位置
-        RaycastHit hit;
-        Vector3 rayStart = newPosition + Vector3.up * 5f;
-        if (Physics.Raycast(rayStart, Vector3.down, out hit, 15f))
+        if (isReturnToFirstLevel)
         {
-            newPosition.y = hit.point.y;
-            if (hadController)
+            newPosition = new Vector3(-26f, 1.46f, 4f);
+            newRotation = Quaternion.Euler(0, -270, 0);
+        }
+        else
+        {
+            // 计算传送位置和旋转
+            Vector3 relativePosition = transform.InverseTransformPoint(player.position);
+            Quaternion relativeRotation = Quaternion.Inverse(transform.rotation) * player.rotation;
+            relativeRotation.x = 0;
+            relativeRotation.z = 0;
+
+            newPosition = virtualCameraPosition + (Vector3.forward * relativePosition.z + Vector3.right * relativePosition.x + Vector3.up * relativePosition.y);     
+            newRotation = relativeRotation;
+            
+            // 使用射线检测找到实际的地面位置
+            RaycastHit hit;
+            Vector3 rayStart = newPosition + Vector3.up * 5f;
+            if (Physics.Raycast(rayStart, Vector3.down, out hit, 15f))
             {
-                newPosition.y += playerController.height * 0.5f + playerController.skinWidth;
+                newPosition.y = hit.point.y;
+                if (hadController)
+                {
+                    newPosition.y += playerController.height * 0.5f + playerController.skinWidth;
+                }
             }
         }
         
@@ -185,6 +226,11 @@ public class Frame : Prop
         if (GameManager.Instance != null)
         {
             GameManager.Instance.OnPlayerTeleported(targetLevel);
+
+            if (isReturnToFirstLevel)
+            {
+                GameManager.Instance.ShowGameEndUI();
+            }
         }
     }
 

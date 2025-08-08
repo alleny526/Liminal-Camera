@@ -13,9 +13,9 @@ GameObject:
   - component: {fileID: 3911231451278225287}
   - component: {fileID: -4342477836093755885}
   - component: {fileID: -6755174176748261397}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: igloo
-  m_TagString: Untagged
+  m_TagString: Prop
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

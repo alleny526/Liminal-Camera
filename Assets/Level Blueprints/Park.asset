@@ -24,10 +24,10 @@ MonoBehaviour:
   - {fileID: 5450710873069496276, guid: 04229ce6df72cc2488d652e4a4d15a30, type: 3}
   - {fileID: 7816631969114809938, guid: 4abd2f9487a85ea49bd868fdf31ef6dc, type: 3}
   allowRandomness: 1
-  maxPOIPaint: 100
+  maxPOIPaint: 10
   maxLargePropPaint: 1500
   maxSmallPropPaint: 2000
   poiSafeDistance: 3
   largePropSafeDistance: 2
   smallPropSafeDistance: 1
-  frameSafeDistance: 10
+  frameSafeDistance: 15

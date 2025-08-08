@@ -30,7 +30,7 @@ MonoBehaviour:
   - {fileID: 5772836939506023739, guid: 252ccfd52dad11042ab635bcd4929447, type: 3}
   - {fileID: 5390416027281643970, guid: 5b798ac7f4f85d44dbae4348e8c5d2bc, type: 3}
   allowRandomness: 1
-  maxPOIPaint: 100
+  maxPOIPaint: 10
   maxLargePropPaint: 1000
   maxSmallPropPaint: 1500
   poiSafeDistance: 5

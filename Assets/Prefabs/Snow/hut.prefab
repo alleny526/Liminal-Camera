@@ -13,9 +13,9 @@ GameObject:
   - component: {fileID: 5066655736411035936}
   - component: {fileID: -811844008154741318}
   - component: {fileID: -8336198225524724448}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: hut
-  m_TagString: Untagged
+  m_TagString: Prop
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
