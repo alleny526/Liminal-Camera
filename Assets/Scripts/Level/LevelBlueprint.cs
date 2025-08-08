@@ -8,11 +8,13 @@ public class LevelBlueprint : ScriptableObject
     public LevelType levelType;
     public GameObject terrainPrefab;
     public GameObject framePrefab;
+    public Material skyboxMaterial;
 
     [Header("关卡Prop配置")]
     public GameObject[] poiPrefabs;
     public GameObject[] largePropPrefabs;
     public GameObject[] smallPropPrefabs;
+    public bool allowRandomness = true;
     
     [Header("颜料设置")]
     public int maxPOIPaint = 100;

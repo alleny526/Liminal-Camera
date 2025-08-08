@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51060870cbd512d48a849c9c2dd9a408, type: 3}
+  m_Name: Snow
+  m_EditorClassIdentifier: 
+  levelType: 8
+  terrainPrefab: {fileID: 5863933880819538545, guid: 57990484f845dd54b865c731e0756f04, type: 3}
+  framePrefab: {fileID: 3772175684896796138, guid: a4ff480a6110db44e883a18a3c3d6eaf, type: 3}
+  skyboxMaterial: {fileID: 2100000, guid: 58f8a72209893fe49a7b900be43c5c4a, type: 2}
+  poiPrefabs:
+  - {fileID: 6724046851711318261, guid: cf98c65fb9cfaa841ba13d612b6b6234, type: 3}
+  - {fileID: 3262717434962480722, guid: f275fe7afbec5984a9b02e00fbcc6d70, type: 3}
+  largePropPrefabs:
+  - {fileID: 5864927412034649859, guid: 3ee74c15c323d4b4e9fc271d8717479f, type: 3}
+  - {fileID: 3131530149301139687, guid: 1d86288a13e3ca54f867dd7667ed4a3d, type: 3}
+  - {fileID: 2490565466555295496, guid: 87f1e848509a14d428a87fc61368989d, type: 3}
+  - {fileID: 6595532847618201703, guid: 1d0f386946f57cd4bb6fb52985184525, type: 3}
+  smallPropPrefabs:
+  - {fileID: 768524955923577515, guid: d1d7ead822734df43bdb5173c01c8891, type: 3}
+  - {fileID: 1646064840862715450, guid: 2270debb0611ae341b23f7c57036c9ec, type: 3}
+  - {fileID: 5772836939506023739, guid: 252ccfd52dad11042ab635bcd4929447, type: 3}
+  - {fileID: 5390416027281643970, guid: 5b798ac7f4f85d44dbae4348e8c5d2bc, type: 3}
+  allowRandomness: 1
+  maxPOIPaint: 100
+  maxLargePropPaint: 1000
+  maxSmallPropPaint: 1500
+  poiSafeDistance: 5
+  largePropSafeDistance: 4
+  smallPropSafeDistance: 2
+  frameSafeDistance: 5

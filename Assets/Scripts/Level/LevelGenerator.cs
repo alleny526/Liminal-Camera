@@ -88,6 +88,11 @@ public class LevelGenerator : MonoBehaviour
         levelRoot = levelRootObj.transform;
         levelRoot.position = pos;
 
+        if (blueprint.skyboxMaterial != null)
+        {
+            RenderSettings.skybox = blueprint.skyboxMaterial;
+        }
+
         // 创建一个专门用于存放玩家生成内容的子对象
         GameObject playerGeneratedContainer = new GameObject("PlayerGeneratedContent");
         playerGeneratedContainer.transform.SetParent(levelRoot);
@@ -260,7 +265,9 @@ public class LevelGenerator : MonoBehaviour
             Vector2 normalizedPos = new Vector2(
                 pointOnLine.x / PaintingSystem.Instance.canvasSize,
                 pointOnLine.y / PaintingSystem.Instance.canvasSize
-            ) + Random.insideUnitCircle * 0.02f;
+            );
+            if (pendingBlueprint.allowRandomness)
+                normalizedPos += Random.insideUnitCircle * 0.02f;
 
             normalizedPos = new Vector2(Mathf.Clamp01(normalizedPos.x), Mathf.Clamp01(normalizedPos.y));
 
@@ -314,10 +321,20 @@ public class LevelGenerator : MonoBehaviour
     {
         if (propPrefabs == null || propPrefabs.Length == 0 || placements.Count == 0) return;
 
+        Renderer[] renderers = levelRoot.GetComponentsInChildren<Renderer>();
+
+        Bounds combinedBounds = renderers[0].bounds;
+        for (int i = 1; i < renderers.Length; i++)
+        {
+            // 合并所有渲染器的包围盒
+            combinedBounds.Encapsulate(renderers[i].bounds);
+        }
+        Vector3 terrainCenter = combinedBounds.center;
+
         foreach (var placement in placements)
         {
             Vector2 normalizedPos = placement.normalizedPosition;
-            Vector3 worldPos = levelRoot.position + new Vector3(
+            Vector3 worldPos = terrainCenter + new Vector3(
                 (normalizedPos.x - 0.5f) * 2f * terrainRadius,
                 0,
                 (normalizedPos.y - 0.5f) * 2f * terrainRadius);
@@ -326,17 +343,19 @@ public class LevelGenerator : MonoBehaviour
             float propRadius = GetPropRadius(selectedPrefab);
 
             RaycastHit hit;
-            if (Physics.Raycast(worldPos + Vector3.up * 10f, Vector3.down, out hit, 25f))
+            if (Physics.Raycast(worldPos + Vector3.up * 10f, Vector3.down, out hit, 25f, LayerMask.GetMask("Terrain")))
             {
-                worldPos.y = hit.point.y;
+                if (hit.collider == null) continue;
                 if (hit.collider.GetComponentInParent<Prop>() != null) continue; // 不能放在prop上
+                worldPos.y = hit.point.y;
             }
 
             // 生成逻辑改为确认的位置，而非寻找随机位置
             // 所以这里判断重叠即可
             if (!IsPositionOverlapping(worldPos, propRadius, spawnedProps, safeDistance) && IsPositionSafeWithColliders(worldPos, propRadius))
             {
-                GameObject propInstance = Instantiate(selectedPrefab, worldPos, Quaternion.Euler(0, Random.Range(0, 360), 0), levelRoot);
+                Quaternion rotation = pendingBlueprint.allowRandomness ? Quaternion.Euler(0, Random.Range(0, 360), 0) : Quaternion.identity;
+                GameObject propInstance = Instantiate(selectedPrefab, worldPos, rotation, levelRoot);
                 // 更新跟踪列表
                 SpawnedPropInfo propInfo = new SpawnedPropInfo(worldPos, propRadius, propInstance);
                 spawnedProps.Add(propInfo);

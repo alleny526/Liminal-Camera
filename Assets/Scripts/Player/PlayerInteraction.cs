@@ -21,6 +21,7 @@ public class PlayerInteraction : MonoBehaviour
     public float frustumHeight = 50f;
     public float frustumBottomWidth = 16f;
     public float frustumBottomHeight = 9f;
+    public AudioSource shutterSound;
     
     [Header("缩放设置")]
     public float minFOV = 30f;
@@ -77,6 +78,7 @@ public class PlayerInteraction : MonoBehaviour
             currentFrustumHeight = frustumHeight;
             placementDistance = (minPlacementDistance + maxPlacementDistance) / 2f;
         }
+        shutterSound = GetComponent<AudioSource>();
 
         // 功能模块初始化
         photoCapturer = new PhotoCapturer(photoCamera, capturableLayer, terrainLayer, currentFrustumHeight, frustumBottomWidth, frustumBottomHeight);
@@ -212,6 +214,8 @@ public class PlayerInteraction : MonoBehaviour
         {
             if (aimUI.activeSelf)
             {
+                // 播放快门音效
+                if (shutterSound != null) shutterSound.Play();
                 StartCoroutine(TakePhotoSequence());
             }
             else if (isPlacing)

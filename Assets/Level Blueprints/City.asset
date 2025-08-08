@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51060870cbd512d48a849c9c2dd9a408, type: 3}
+  m_Name: City
+  m_EditorClassIdentifier: 
+  levelType: 3
+  terrainPrefab: {fileID: 6628327301752842575, guid: 10ba862b05988554e97bd5f172391e13, type: 3}
+  framePrefab: {fileID: 3772175684896796138, guid: a4ff480a6110db44e883a18a3c3d6eaf, type: 3}
+  skyboxMaterial: {fileID: 2100000, guid: 9d285e59d9b19d7438621d00392aa38f, type: 2}
+  poiPrefabs:
+  - {fileID: 100000, guid: 6914077b9d0e43e4090991c52b9f7683, type: 3}
+  - {fileID: 100000, guid: 530214eb32dccc04bad746c1266c1496, type: 3}
+  - {fileID: 100000, guid: 63528d22701d39d4392ccbe9401cdc08, type: 3}
+  - {fileID: 100000, guid: 0e684fd0fcc903d4e994d8a885ac25c3, type: 3}
+  - {fileID: 100000, guid: d70472f33a6b8084cb2d4c0f5d292678, type: 3}
+  - {fileID: 100000, guid: 27dbfd3f3f3c90645ba885b9cfcfd60c, type: 3}
+  - {fileID: 100000, guid: efacf8a97e9f5a949a97033e572e86a2, type: 3}
+  - {fileID: 100000, guid: 2687563ea12f08e499a6239990bb8033, type: 3}
+  - {fileID: 100000, guid: da0dca0b6e5448d47a9aeea8adc5b241, type: 3}
+  - {fileID: 100000, guid: 27e48baaab9a4e644b669706ae5f92fd, type: 3}
+  - {fileID: 100000, guid: 150745bd35443544ead22b889aaf9464, type: 3}
+  largePropPrefabs:
+  - {fileID: 100000, guid: 334476f205316134faf3b3f0378ccc88, type: 3}
+  - {fileID: 100000, guid: 9e672d7804d0a2645a2278d53626356d, type: 3}
+  - {fileID: 100000, guid: 162de0c3d8a8c784c86e8490b76237b7, type: 3}
+  - {fileID: 100000, guid: fd238c0c96c33924c8c739b7fec01cc6, type: 3}
+  - {fileID: 100000, guid: 6bccea66b853dff4f98f1971d28d0fc8, type: 3}
+  - {fileID: 100000, guid: 16a0330b423dd344b9ed0a55389ee481, type: 3}
+  smallPropPrefabs:
+  - {fileID: 100000, guid: 03f02362b4d77ff468e58f65acc1f5a6, type: 3}
+  - {fileID: 100000, guid: 09673100b664fa14fa1a5c73fb947ab4, type: 3}
+  - {fileID: 100000, guid: 49d0b78a555b41f45a5a013f05057920, type: 3}
+  - {fileID: 100000, guid: 0ad5409dea6cee743b7527f50d9aa23b, type: 3}
+  - {fileID: 100000, guid: 2505bbb8f79440146b49901f605d080d, type: 3}
+  - {fileID: 100000, guid: 712a8be5954e27f4bbc7278e3d10a96c, type: 3}
+  allowRandomness: 1
+  maxPOIPaint: 1000
+  maxLargePropPaint: 1000
+  maxSmallPropPaint: 1500
+  poiSafeDistance: 0
+  largePropSafeDistance: 0
+  smallPropSafeDistance: 0
+  frameSafeDistance: 10

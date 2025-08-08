@@ -15,6 +15,7 @@ MonoBehaviour:
   levelType: 1
   terrainPrefab: {fileID: 6628327301752842575, guid: 18de55eaef51f3042ba49d9dd13e48e5, type: 3}
   framePrefab: {fileID: 3772175684896796138, guid: a4ff480a6110db44e883a18a3c3d6eaf, type: 3}
+  skyboxMaterial: {fileID: 2100000, guid: db4516def045ee644aa2ed2afaf39c0e, type: 2}
   poiPrefabs:
   - {fileID: 2817329950444559287, guid: 1af938230b81c824e8f392cb5c11000d, type: 3}
   largePropPrefabs:
@@ -22,6 +23,7 @@ MonoBehaviour:
   smallPropPrefabs:
   - {fileID: 5450710873069496276, guid: 04229ce6df72cc2488d652e4a4d15a30, type: 3}
   - {fileID: 7816631969114809938, guid: 4abd2f9487a85ea49bd868fdf31ef6dc, type: 3}
+  allowRandomness: 1
   maxPOIPaint: 100
   maxLargePropPaint: 1500
   maxSmallPropPaint: 2000

@@ -1,0 +1,49 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51060870cbd512d48a849c9c2dd9a408, type: 3}
+  m_Name: Anime
+  m_EditorClassIdentifier: 
+  levelType: 5
+  terrainPrefab: {fileID: 6628327301752842575, guid: 2ff0d2dfd99492e4fa6a4ba11b742bb5, type: 3}
+  framePrefab: {fileID: 3772175684896796138, guid: a4ff480a6110db44e883a18a3c3d6eaf, type: 3}
+  skyboxMaterial: {fileID: 2100000, guid: 596ea38b2b7558343b36d75be058e922, type: 2}
+  poiPrefabs:
+  - {fileID: 8274077260532194656, guid: 6bfd23ed36b53d944a973e69d4efcc6f, type: 3}
+  - {fileID: 6545576631236773151, guid: 5e56e838828c1e04c9217746d19dc7f2, type: 3}
+  largePropPrefabs:
+  - {fileID: 4964353397659614430, guid: 56676547050ae374689eafd4bec38804, type: 3}
+  - {fileID: 4874496035667420136, guid: 854a61980fa9d0342947c2e85824c86d, type: 3}
+  - {fileID: 9196924377342507874, guid: 81a886cde5ea47942b041b1967da7f31, type: 3}
+  - {fileID: 1260433983695324353, guid: 5554fbadd1f9ca44a81e2ea695b26c35, type: 3}
+  - {fileID: 8635848929689198628, guid: f753c5927113f9e4288421dc288cc4a0, type: 3}
+  - {fileID: 4607619670884455796, guid: 5537f84f1902dfc43aaec6fd9221ae2a, type: 3}
+  - {fileID: 1897691690259496952, guid: 801db1a0796388242a08f731b5e1c61b, type: 3}
+  - {fileID: 1120094078051397631, guid: 88a6a30ba0963e54a9b4888d2fcc125d, type: 3}
+  smallPropPrefabs:
+  - {fileID: 2586401017402867153, guid: 167108a9f0fcd46478c159cac7f03077, type: 3}
+  - {fileID: 7923443193049189612, guid: 3a8bcd62c8936ea4cb0b647dbbdbed53, type: 3}
+  - {fileID: 8472064894536206224, guid: fab48c447312aea48890af458317cca6, type: 3}
+  - {fileID: 1229819433555994375, guid: 79aef5bedf396cb419ea20a8b90a0e01, type: 3}
+  - {fileID: 2300355430653151185, guid: fabd9671d89b6b148bb8bdc2295e8148, type: 3}
+  - {fileID: 697958618200987824, guid: 2e7e9ad0898fdcb4696d9e32731ba5c4, type: 3}
+  - {fileID: 4697185947922342197, guid: d5f1eedad307e0c428406c6c63b6724b, type: 3}
+  - {fileID: 4242910948230072054, guid: 2219a6b0bd39f23469221d91f1e38167, type: 3}
+  - {fileID: 2205854901878985042, guid: e10e785639d859d4a97056ed63a17cd4, type: 3}
+  - {fileID: 5493548804736309740, guid: 1918178b57e65544bbae6ecd8b069d97, type: 3}
+  allowRandomness: 1
+  maxPOIPaint: 100
+  maxLargePropPaint: 1500
+  maxSmallPropPaint: 3000
+  poiSafeDistance: 2
+  largePropSafeDistance: 1
+  smallPropSafeDistance: 0
+  frameSafeDistance: 3

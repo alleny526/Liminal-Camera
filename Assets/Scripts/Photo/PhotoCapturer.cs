@@ -52,13 +52,11 @@ namespace LiminalCamera.Photo
         }
 
         // 捕获视锥体内的所有Props
-        // TODO: 目前没有部分在内即捕获的功能，需要添加
         public List<CapturedPropData> CapturePropsInView()
         {
             List<CapturedPropData> propsInView = new List<CapturedPropData>();
 
             // 先捕获以photo camera为中心，以锥体高度为半径的球体内的所有可捕获Props
-            // TODO: 方法目前比较妥协，后续需要改进 -- 考虑设置一个trigger collider？--也需从性能层考虑
             Collider[] allProps = Physics.OverlapSphere(photoCamera.transform.position, currentFrustumHeight, capturableLayer);
 
             foreach (Collider propCollider in allProps)
@@ -71,7 +69,6 @@ namespace LiminalCamera.Photo
                          && prop.canCapture)
                     {
                         // 检查Prop是否在锥形视锥体内
-                        // TODO: 只有部分在锥形体内的Prop不会被捕获 -- 看的是prop.transform.position
                         if (IsInFrustum(prop.transform.position))
                         {
                             CapturedPropData capturedData = new CapturedPropData
@@ -91,7 +88,6 @@ namespace LiminalCamera.Photo
         }
 
         // 捕获地形与拍照锥体的相交面
-        // TODO: 直接循环判断三角形方法比较粗暴，研究下会不会有更好的方法
         public TerrainIntersectionData CaptureTerrainIntersectionData()
         {
             Collider[] allTerrain = Physics.OverlapSphere(photoCamera.transform.position, currentFrustumHeight, terrainLayer);

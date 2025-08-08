@@ -94,7 +94,7 @@ public class Frame : Prop
         Quaternion relativeRotation = Quaternion.Inverse(transform.rotation) * mainCamera.transform.rotation;
 
         // 在目标关卡中应用相同的相对变换
-        Vector3 portalCamPosition = virtualCameraPosition + Vector3.forward * relativePosition.z + Vector3.right * relativePosition.x + Vector3.up * relativePosition.y;
+        Vector3 portalCamPosition = virtualCameraPosition + Vector3.forward * relativePosition.z + Vector3.right * relativePosition.x + Vector3.up * relativePosition.y + Vector3.up * 2.0f;
         Quaternion portalCamRotation = relativeRotation;
         
         portalCamera.transform.SetPositionAndRotation(portalCamPosition, portalCamRotation);

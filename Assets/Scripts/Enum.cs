@@ -2,7 +2,14 @@ public enum LevelType
 {
     None,
     Park,
-    Forest
+    Forest,
+    City,
+    Mountain,
+    Anime,
+    Cute,
+    Desert,
+    Snow,
+    Playground
 }
 
 public enum PropType

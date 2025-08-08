@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51060870cbd512d48a849c9c2dd9a408, type: 3}
+  m_Name: Playground
+  m_EditorClassIdentifier: 
+  levelType: 9
+  terrainPrefab: {fileID: 3550224320512709835, guid: 898c309aad0303c49b6ff589047996ce, type: 3}
+  framePrefab: {fileID: 3772175684896796138, guid: a4ff480a6110db44e883a18a3c3d6eaf, type: 3}
+  skyboxMaterial: {fileID: 2100000, guid: 2c034079d7065ff49bb7b6abe02a649e, type: 2}
+  poiPrefabs: []
+  largePropPrefabs:
+  - {fileID: 1846208716538333030, guid: 23ee35decb8b28c4f81c47b312316594, type: 3}
+  - {fileID: 530147588502193990, guid: fdc9da65316f7a8459202e4af773b7dd, type: 3}
+  - {fileID: 7226899359155137390, guid: cc89878d546ac714fbf3153a8249e578, type: 3}
+  - {fileID: 947576878283017124, guid: 1d25507929c90b347a5a7880a49778ac, type: 3}
+  - {fileID: 4962223851112443088, guid: 7b9f60ed6a610af45bf54704e6666ca4, type: 3}
+  - {fileID: 2446329296860682998, guid: 32048de225631fc4895a04d3c6cd4dd9, type: 3}
+  - {fileID: 6887492905121085115, guid: 1102fc4e66327e942bf6fa88a1f5a5fe, type: 3}
+  - {fileID: 3448096148395246193, guid: 48998067ecc6b394385e2a53e91bb9df, type: 3}
+  - {fileID: 4207457694302367893, guid: 430460dbfad510b4bb09ee9c86e47993, type: 3}
+  - {fileID: 4455263080433830715, guid: 5d7224ce4014a3544a5f8b9fe4056673, type: 3}
+  - {fileID: 5130029478089651992, guid: be58f9693efc1f5438416e500c86d162, type: 3}
+  - {fileID: 7093660499286963764, guid: 6c1f2689e1ad1e7488f0a619bd16c9c7, type: 3}
+  - {fileID: 4259539283039676125, guid: 72ba648f38f69ee4bb9ecae6ea17a9be, type: 3}
+  - {fileID: 207510570429624245, guid: 0eda6359b3e491e4fa0edc32d84ea9c2, type: 3}
+  - {fileID: 5617008723372108304, guid: 5a0aae39c0922da47a55563a8095bf28, type: 3}
+  - {fileID: 7690065063643396277, guid: e292118873abb4748b8e3db62b83c230, type: 3}
+  - {fileID: 5322093474552579706, guid: 3f03560089acbc241b44779bf7cc6d58, type: 3}
+  smallPropPrefabs:
+  - {fileID: 4337116803773559145, guid: 8165b5dcb2d13fd47b3ec8d8157c5ddc, type: 3}
+  - {fileID: 3395260072555334217, guid: e7b212c67034c0644861272e281eab55, type: 3}
+  - {fileID: 5654759934159595845, guid: cea3937caffd87a49aa0fd9a5276bde2, type: 3}
+  - {fileID: 6391572996815671003, guid: 5fa977612108b3b428399f0badc229d8, type: 3}
+  - {fileID: 6767546374251425599, guid: 951641ec6b8b1ae44a9e1f0f3e04593b, type: 3}
+  - {fileID: 7291038580486291444, guid: e4b049a92ec811d44ad16d291bc8ba32, type: 3}
+  - {fileID: 259534554852313541, guid: 7093500ef10847143be50312f51f4eca, type: 3}
+  - {fileID: 1860204950555500670, guid: 7f29cf2477c5ac249b66ebe1fee1ead5, type: 3}
+  - {fileID: 3885205801483390603, guid: c4cb481ff7e24054a8e1865df2b62b48, type: 3}
+  allowRandomness: 1
+  maxPOIPaint: 0
+  maxLargePropPaint: 1500
+  maxSmallPropPaint: 2000
+  poiSafeDistance: 5
+  largePropSafeDistance: 2
+  smallPropSafeDistance: 1
+  frameSafeDistance: 5

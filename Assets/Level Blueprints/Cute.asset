@@ -1,0 +1,35 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51060870cbd512d48a849c9c2dd9a408, type: 3}
+  m_Name: Cute
+  m_EditorClassIdentifier: 
+  levelType: 6
+  terrainPrefab: {fileID: 3008109666763263935, guid: 3a07a78ff11cd2d42922b1fc6a8947d6, type: 3}
+  framePrefab: {fileID: 3772175684896796138, guid: a4ff480a6110db44e883a18a3c3d6eaf, type: 3}
+  skyboxMaterial: {fileID: 0}
+  poiPrefabs:
+  - {fileID: 4123276510376205671, guid: 5184ecced8f433644999fd724cc4375a, type: 3}
+  largePropPrefabs:
+  - {fileID: 868859769844269485, guid: f6d439d366dd32b4e8b2a68f8419f27b, type: 3}
+  - {fileID: 746657117632786859, guid: 79e451af963d01e4e8f45aff5de6bb04, type: 3}
+  smallPropPrefabs:
+  - {fileID: 4387460801703922916, guid: df0b8921b8d6d3c48be8460e213b57ae, type: 3}
+  - {fileID: 76881797611610635, guid: 18cdeb7e51f15d74b93f97dd7f2d52d4, type: 3}
+  - {fileID: 3254093717776056741, guid: 58268cbb004e10c49816decb39767cb8, type: 3}
+  allowRandomness: 1
+  maxPOIPaint: 100
+  maxLargePropPaint: 1500
+  maxSmallPropPaint: 2000
+  poiSafeDistance: 3
+  largePropSafeDistance: 2
+  smallPropSafeDistance: 1
+  frameSafeDistance: 5

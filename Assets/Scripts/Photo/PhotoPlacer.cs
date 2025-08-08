@@ -119,10 +119,20 @@ namespace LiminalCamera.Photo
             
             newTerrainMesh.vertices = vertices;
             newTerrainMesh.triangles = terrainData.intersectionTriangles;
-            if (terrainData.intersectionUVs != null)
+
+            // 重新计算合并后的UV
+            Vector2[] recalculatedUVs = new Vector2[vertices.Length];
+            Bounds meshBounds = newTerrainMesh.bounds;
+            for (int i = 0; i < vertices.Length; i++)
             {
-                newTerrainMesh.uv = terrainData.intersectionUVs;
+                Vector3 v = vertices[i];
+                recalculatedUVs[i] = new Vector2(
+                    (v.x - meshBounds.min.x) / meshBounds.size.x,
+                    (v.z - meshBounds.min.z) / meshBounds.size.z
+                );
             }
+            newTerrainMesh.uv = recalculatedUVs;
+
             newTerrainMesh.RecalculateNormals();
             newTerrainMesh.RecalculateBounds();
             

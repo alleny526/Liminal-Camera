@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 51060870cbd512d48a849c9c2dd9a408, type: 3}
+  m_Name: Desert
+  m_EditorClassIdentifier: 
+  levelType: 7
+  terrainPrefab: {fileID: 1256858306203008, guid: 359028291fa35fe4db24c6c2ee631372, type: 3}
+  framePrefab: {fileID: 3772175684896796138, guid: a4ff480a6110db44e883a18a3c3d6eaf, type: 3}
+  skyboxMaterial: {fileID: 2100000, guid: fedf0e2609c99884480cd6a73f84ac9d, type: 2}
+  poiPrefabs:
+  - {fileID: 1856861724390114, guid: f5822c7015ae10d408a2707ae17225d9, type: 3}
+  - {fileID: 1948406263984082, guid: b4c2bb229af865846bc9dbd5dcf4c6c9, type: 3}
+  largePropPrefabs:
+  - {fileID: 1745671036675386, guid: 65b91a81eb59c7945bce0309aa41a9f2, type: 3}
+  - {fileID: 1978445070297066, guid: 06d814d8214574f42a387fda9f66f4af, type: 3}
+  - {fileID: 1337108901918474, guid: 6aa6d3aa366764e41919e7e2d38868eb, type: 3}
+  - {fileID: 1150461584060438, guid: bf188cad41e58194c916fd0ecd1ae3bb, type: 3}
+  - {fileID: 1371598241635088, guid: f98ac17e5db64eb40a0016991fd11c9e, type: 3}
+  - {fileID: 1106205639809762, guid: 9da441bd714105f409e06fc504015707, type: 3}
+  - {fileID: 1484873974708226, guid: 9fc042eb1db402444b5dcccf9b2fe477, type: 3}
+  - {fileID: 1400461039152700, guid: a996b0b8fb4b2414cb998c6adcd40a3f, type: 3}
+  - {fileID: 1327385724211766, guid: a363dc59af7026141922247f14dcd74a, type: 3}
+  - {fileID: 1218347679047942, guid: 88e77adf601ad884da115c4214420b5b, type: 3}
+  smallPropPrefabs:
+  - {fileID: 1943996455298776, guid: e57bf150d99f98345961186c3d1af4eb, type: 3}
+  - {fileID: 1835125518048470, guid: 2e32833e533dafa4188736025b164ca9, type: 3}
+  - {fileID: 1255758057252634, guid: b0db0b6f25b6bc648a1019c213ae3021, type: 3}
+  - {fileID: 1330862079685384, guid: 1bb083728d5f1ab4f89e08502a6273ca, type: 3}
+  - {fileID: 1051370914222626, guid: aec86b91eb44ef84a8887c10c8a59d90, type: 3}
+  - {fileID: 1539544152721592, guid: 428bfba5da9a40f4eb554714a025d780, type: 3}
+  - {fileID: 1928822907758636, guid: 7fd9e5b4095257f4d8562fdd99c2e80c, type: 3}
+  - {fileID: 1562575627230960, guid: 4870a66adb9a7eb43b37cbc9e955f313, type: 3}
+  - {fileID: 1932949725897360, guid: 603c2f7dd2700bc4cbd9305691b17a8f, type: 3}
+  - {fileID: 1862922641584384, guid: 824669c11dacf6342bf6524efe651fbd, type: 3}
+  - {fileID: 1228419803925864, guid: 007d936a6a9997f48b9e06781c6787aa, type: 3}
+  - {fileID: 1808644162293686, guid: a8976aa5a95f7dc4d8897822a7bb0ad2, type: 3}
+  allowRandomness: 1
+  maxPOIPaint: 100
+  maxLargePropPaint: 1500
+  maxSmallPropPaint: 2000
+  poiSafeDistance: 10
+  largePropSafeDistance: 4
+  smallPropSafeDistance: 2
+  frameSafeDistance: 5
