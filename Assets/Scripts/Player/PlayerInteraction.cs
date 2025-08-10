@@ -22,7 +22,7 @@ public class PlayerInteraction : MonoBehaviour
     public float frustumBottomWidth = 16f;
     public float frustumBottomHeight = 9f;
     public AudioSource shutterSound;
-    
+
     [Header("缩放设置")]
     public float minFOV = 30f;
     public float maxFOV = 80f;
@@ -70,7 +70,7 @@ public class PlayerInteraction : MonoBehaviour
         placementHintUI.SetActive(false);
         restartHintUI.SetActive(true);
         if (screenFadeUI != null) screenFadeUI.color = new Color(0, 0, 0, 0);
-        
+
         // 状态初始化
         if (photoCamera != null)
         {
@@ -107,11 +107,11 @@ public class PlayerInteraction : MonoBehaviour
         currentFOV -= scrollDelta * zoomSensitivity;
         currentFOV = Mathf.Clamp(currentFOV, minFOV, maxFOV);
         photoCamera.fieldOfView = currentFOV;
-        
+
         // 根据FOV计算锥体高度 (FOV越小，锥体高度越大)
         float normalizedFOV = (currentFOV - minFOV) / (maxFOV - minFOV);
         currentFrustumHeight = Mathf.Lerp(maxFrustumHeight, minFrustumHeight, normalizedFOV);
-        
+
         if (photoCapturer != null)
             photoCapturer.UpdateFrustumParameters(currentFrustumHeight);
     }
@@ -123,7 +123,7 @@ public class PlayerInteraction : MonoBehaviour
         // 更新放置距离 (滚轮向上减小距离)
         placementDistance -= scrollDelta * 2f;
         placementDistance = Mathf.Clamp(placementDistance, minPlacementDistance, maxPlacementDistance);
-        
+
         if (placementUI != null)
         {
             // 根据放置距离计算UI缩放 (距离越近，UI越大)
@@ -131,7 +131,7 @@ public class PlayerInteraction : MonoBehaviour
             float uiScale = Mathf.Lerp(7.5f, 6.0f, normalizedDistance);
             placementUI.transform.localScale = Vector3.one * uiScale;
         }
-        
+
         if (photoPlacer != null)
             photoPlacer.UpdatePlacementDistance(placementDistance);
     }
@@ -238,7 +238,7 @@ public class PlayerInteraction : MonoBehaviour
 
         // 保存照片
         heldPhoto = photoCapturer.SavePhoto();
-        
+
         heldPhotoUI.texture = heldPhoto.photoImage;
         placementUI.texture = heldPhoto.photoImage;
         heldPhotoUI.gameObject.SetActive(true);
@@ -268,7 +268,18 @@ public class PlayerInteraction : MonoBehaviour
 
         // 放置照片
         photoPlacer.PlacePhoto(heldPhoto);
-        
+
         heldPhoto = null;
+    }
+
+    public void ResetPhotoData()
+    {
+        heldPhoto = null;
+        heldPhotoUI.gameObject.SetActive(false);
+
+        enterCaptureHintUI.SetActive(true);
+        enterPlacementHintUI.SetActive(false);
+        captureHintUI.SetActive(false);
+        placementHintUI.SetActive(false);
     }
 }

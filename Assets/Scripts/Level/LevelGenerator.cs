@@ -343,7 +343,7 @@ public class LevelGenerator : MonoBehaviour
             float propRadius = GetPropRadius(selectedPrefab);
 
             RaycastHit hit;
-            if (Physics.Raycast(worldPos + Vector3.up * 10f, Vector3.down, out hit, 25f, LayerMask.GetMask("Terrain")))
+            if (Physics.Raycast(worldPos + Vector3.up * 10f, Vector3.down, out hit, 25f))
             {
                 if (hit.collider == null) continue;
                 if (hit.collider.GetComponentInParent<Prop>() != null) continue; // 不能放在prop上
@@ -406,6 +406,7 @@ public class LevelGenerator : MonoBehaviour
                 Frame frameComponent = frameInstance.GetComponent<Frame>();
                 if (frameComponent != null)
                 {
+                    GameManager.Instance.firstLevel.SetActive(true);
                     frameComponent.isReturnToFirstLevel = true;
                 }
             }

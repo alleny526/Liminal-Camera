@@ -11,6 +11,8 @@ public class GameManager : MonoBehaviour
 
     public Canvas gameEndCanvas;
 
+    public GameObject firstLevel;
+
     private Transform currentLevelRoot;
     private Transform firstLevelRoot;
     private List<Transform> activeLevels = new List<Transform>();
@@ -36,10 +38,10 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         // 第一关特殊化处理
-        GameObject firstLevelObject = GameObject.Find("FirstLevel"); 
-        if (firstLevelObject != null)
+        firstLevel = GameObject.Find("FirstLevel");
+        if (firstLevel != null)
         {
-            firstLevelRoot = firstLevelObject.transform;
+            firstLevelRoot = firstLevel.transform;
             currentLevelRoot = firstLevelRoot;
         }
         player.GetComponent<PlayerInteraction>().playerInitLevelPosition = player.transform.position;
@@ -125,6 +127,11 @@ public class GameManager : MonoBehaviour
     {
         Transform oldLevelRoot = currentLevelRoot;
 
+        if (oldLevelRoot == firstLevelRoot)
+        {
+            firstLevel.SetActive(false);
+        }
+
         currentLevelRoot = newLevelRoot;
 
         bool isReturningToFirstLevel = (newLevelRoot == firstLevelRoot);
@@ -205,6 +212,11 @@ public class GameManager : MonoBehaviour
         }
 
         LevelGenerator.Instance.SetFrameGenerated(false);
+        PlayerInteraction playerInteraction = player.GetComponent<PlayerInteraction>();
+        if (playerInteraction != null)
+        {
+            playerInteraction.ResetPhotoData();
+        }
 
         player.GetComponent<CharacterController>().enabled = false;
         player.transform.position = player.GetComponent<PlayerInteraction>().playerInitLevelPosition;
