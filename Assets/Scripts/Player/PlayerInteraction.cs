@@ -37,7 +37,7 @@ public class PlayerInteraction : MonoBehaviour
     public GameObject aimUI;
     public RawImage heldPhotoUI;
     public RawImage placementUI;
-    public Image screenFadeUI;
+    public Image transitionUI;
     public GameObject enterCaptureHintUI;
     public GameObject captureHintUI;
     public GameObject enterPlacementHintUI;
@@ -69,7 +69,7 @@ public class PlayerInteraction : MonoBehaviour
         captureHintUI.SetActive(false);
         placementHintUI.SetActive(false);
         restartHintUI.SetActive(true);
-        if (screenFadeUI != null) screenFadeUI.color = new Color(0, 0, 0, 0);
+        if (transitionUI != null) transitionUI.color = new Color(1, 1, 1, 1);
 
         // 状态初始化
         if (photoCamera != null)
@@ -228,7 +228,7 @@ public class PlayerInteraction : MonoBehaviour
     private IEnumerator TakePhotoSequence()
     {
         aimUI.SetActive(false);
-        if (screenFadeUI != null) yield return StartCoroutine(PhotoUtil.FadeScreen(screenFadeUI, true, 0.2f));
+        if (transitionUI != null) yield return StartCoroutine(PhotoUtil.FadeScreen(transitionUI, true, 0.2f));
 
         // 捕获Props
         List<CapturedPropData> propsInView = photoCapturer.CapturePropsInView();
@@ -248,7 +248,7 @@ public class PlayerInteraction : MonoBehaviour
         mainCamera.enabled = true;
         mainCamera.gameObject.SetActive(true);
 
-        if (screenFadeUI != null) yield return StartCoroutine(PhotoUtil.FadeScreen(screenFadeUI, false, 0.3f));
+        if (transitionUI != null) yield return StartCoroutine(PhotoUtil.FadeScreen(transitionUI, false, 0.3f));
     }
 
     private void PlacePhoto()

@@ -157,7 +157,7 @@ namespace LiminalCamera.Photo
         // 移除与视锥相交的现有内容
         private void RemoveIntersectingContent(PhotoData photoData)
         {
-            RemoveIntersectingTerrainTriangles(photoData);
+            // RemoveIntersectingTerrainTriangles(photoData);
             
             RemoveIntersectingProps(photoData);
         }

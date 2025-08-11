@@ -422,6 +422,7 @@ MonoBehaviour:
   player: {fileID: 751227597}
   levelOffset: {x: 0, y: 0, z: 500}
   gameEndCanvas: {fileID: 621472647}
+  firstLevel: {fileID: 1584114955}
 --- !u!1001 &15866284
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -12491,7 +12492,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u70B9\u51FB\u9F20\u6807\u5DE6\u952E\u4EE5\u653E\u7F6E\u7167\u7247"
+  m_text: "\u70B9\u51FB\u9F20\u6807\u5DE6\u952E\u4EE5\u653E\u7F6E\u7167\u7247\n\u6ED1\u52A8\u6EDA\u8F6E\u4EE5\u63A7\u5236\u89C6\u8DDD"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 74ba208c675d1cb4da6394f1d7a06666, type: 2}
   m_sharedMaterial: {fileID: -6315303739782574314, guid: 74ba208c675d1cb4da6394f1d7a06666, type: 2}
@@ -12554,7 +12555,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: -275.2268, w: 0}
+  m_margin: {x: 0, y: 0, z: -275.2268, w: -32.435913}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -26054,7 +26055,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u70B9\u51FB\u9F20\u6807\u5DE6\u952E\u4EE5\u62CD\u6444"
+  m_text: "\u70B9\u51FB\u9F20\u6807\u5DE6\u952E\u4EE5\u62CD\u6444\n\u6ED1\u52A8\u6EDA\u8F6E\u4EE5\u53D8\u7126"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 74ba208c675d1cb4da6394f1d7a06666, type: 2}
   m_sharedMaterial: {fileID: -6315303739782574314, guid: 74ba208c675d1cb4da6394f1d7a06666, type: 2}
@@ -26117,7 +26118,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 0, y: 0, z: -275.2268, w: 0}
+  m_margin: {x: 0, y: 0, z: -275.2268, w: -35.32605}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -40654,8 +40655,8 @@ MonoBehaviour:
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
-  m_Antialiasing: 0
+  m_RenderPostProcessing: 1
+  m_Antialiasing: 2
   m_AntialiasingQuality: 2
   m_StopNaN: 0
   m_Dithering: 0
@@ -40717,7 +40718,7 @@ Camera:
   near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
-  orthographic: 1
+  orthographic: 0
   orthographic size: 5
   m_Depth: 0
   m_CullingMask:
@@ -45254,7 +45255,7 @@ GameObject:
   - component: {fileID: 2136742733}
   - component: {fileID: 2136742732}
   m_Layer: 5
-  m_Name: Black
+  m_Name: Transition
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

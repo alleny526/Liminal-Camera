@@ -122,8 +122,10 @@ public class PaintingSystem : MonoBehaviour
     // 初始化预览相机
     private void SetupPreviewCamera()
     {
-        previewCamera.orthographic = true;
-        previewCamera.transform.rotation = Quaternion.Euler(90f, 0f, 0f);
+        // 设置透视相机，从略微倾斜的角度俯视
+        previewCamera.orthographic = false;
+        previewCamera.fieldOfView = 60f;
+        previewCamera.transform.rotation = Quaternion.Euler(45f, 0f, 0f);
         previewCamera.enabled = false;
 
         previewRenderTexture = new RenderTexture(512, 512, 24);
@@ -158,16 +160,20 @@ public class PaintingSystem : MonoBehaviour
         Cursor.visible = true;
 
         previewCamera.enabled = true;
-        // 根据地形renderer的Bounds设置预览相机位置和大小
+        // 根据地形renderer的Bounds设置预览相机位置
         Renderer terrainRenderer = levelRoot.GetComponentInChildren<Renderer>();
         if (terrainRenderer != null)
         {
             Bounds terrainBounds = terrainRenderer.bounds;
-            float maxHorizontalSize = Mathf.Max(terrainBounds.size.x, terrainBounds.size.z);
-            previewCamera.orthographicSize = (maxHorizontalSize / 2f) + previewCameraPadding;
-
             Vector3 terrainCenter = terrainBounds.center;
-            Vector3 previewPos = new Vector3(terrainCenter.x, terrainCenter.y + previewCameraHeight, terrainCenter.z);
+            
+            // 计算合适的距离以包含整个地形
+            float maxSize = Mathf.Max(terrainBounds.size.x, terrainBounds.size.z, terrainBounds.size.y);
+            float distance = (maxSize / 2f + previewCameraPadding) / Mathf.Tan(previewCamera.fieldOfView * 0.5f * Mathf.Deg2Rad);
+            
+            // 从倾斜角度设置相机位置，使其能看到整个地形
+            Vector3 offset = previewCamera.transform.rotation * Vector3.back * distance;
+            Vector3 previewPos = terrainCenter + offset;
             previewCamera.transform.position = previewPos;
         }
         UpdatePreview();
