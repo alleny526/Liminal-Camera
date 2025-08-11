@@ -30,4 +30,4 @@ MonoBehaviour:
   poiSafeDistance: 3
   largePropSafeDistance: 2
   smallPropSafeDistance: 1
-  frameSafeDistance: 15
+  frameSafeDistance: 10

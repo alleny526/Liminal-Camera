@@ -423,6 +423,7 @@ MonoBehaviour:
   levelOffset: {x: 0, y: 0, z: 500}
   gameEndCanvas: {fileID: 621472647}
   firstLevel: {fileID: 1584114955}
+  transitionUI: {fileID: 2136742732}
 --- !u!1001 &15866284
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -45260,7 +45261,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &2136742731
 RectTransform:
   m_ObjectHideFlags: 0
@@ -45293,7 +45294,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 0}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -45518,6 +45519,10 @@ PrefabInstance:
       objectReference: {fileID: 177301421}
     - target: {fileID: 6075757751814703510, guid: 4e9de429961718a49bc0e79f70cb8749, type: 3}
       propertyPath: screenFadeUI
+      value: 
+      objectReference: {fileID: 2136742732}
+    - target: {fileID: 6075757751814703510, guid: 4e9de429961718a49bc0e79f70cb8749, type: 3}
+      propertyPath: transitionUI
       value: 
       objectReference: {fileID: 2136742732}
     - target: {fileID: 6075757751814703510, guid: 4e9de429961718a49bc0e79f70cb8749, type: 3}
