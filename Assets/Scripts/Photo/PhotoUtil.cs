@@ -97,8 +97,8 @@ namespace LiminalCamera.Photo
         public static IEnumerator FadeScreen(Image screenFadeUI, bool fadeIn, float duration)
         {
             float timer = 0f;
-            Color startColor = fadeIn ? new Color(0, 0, 0, 0) : Color.black;
-            Color endColor = fadeIn ? Color.black : new Color(0, 0, 0, 0);
+            Color startColor = fadeIn ? new Color(0, 0, 0, 0) : Color.white;
+            Color endColor = fadeIn ? Color.white : new Color(0, 0, 0, 0);
             while (timer < duration)
             {
                 if (screenFadeUI != null) screenFadeUI.color = Color.Lerp(startColor, endColor, timer / duration);

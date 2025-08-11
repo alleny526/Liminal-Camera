@@ -69,7 +69,7 @@ public class PlayerInteraction : MonoBehaviour
         captureHintUI.SetActive(false);
         placementHintUI.SetActive(false);
         restartHintUI.SetActive(true);
-        if (transitionUI != null) transitionUI.color = new Color(1, 1, 1, 1);
+        if (transitionUI != null) transitionUI.color = new Color(0, 0, 0, 0);
 
         // 状态初始化
         if (photoCamera != null)
